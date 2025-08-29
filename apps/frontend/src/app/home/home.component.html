@@ -1,0 +1,19 @@
+<div class="home-container">
+  <h2>Welcome to Health Companion</h2>
+  <div class="status-section">
+    <h3>API Status Check</h3>
+    <div
+      class="status-indicator"
+      [ngClass]="{
+        success: apiStatus === 'ok',
+        error: apiStatus === 'error',
+        loading: apiStatus === 'loading'
+      }"
+    >
+      <span>Status: {{ apiStatusMessage }}</span>
+    </div>
+    <button (click)="checkApiHealth()" [disabled]="apiStatus === 'loading'">
+      {{ apiStatus === "loading" ? "Checking..." : "Check API Health" }}
+    </button>
+  </div>
+</div>

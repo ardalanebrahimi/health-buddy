@@ -1,10 +1,57 @@
-# Health Buddy 🏥💪
+# Health Companion 🏥💪
 
 A comprehensive health tracking application designed to help users monitor their wellness journey through biometrics, nutrition, mood tracking, and AI-powered insights.
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** (LTS version 18 or higher)
+- **npm** (version 9 or higher)
+
+### Development Setup
+
+1. **Install dependencies**:
+
+   ```cmd
+   npm run install:all
+   ```
+
+2. **Start the backend API**:
+
+   ```cmd
+   npm run dev:api
+   ```
+
+   The API server will start on `http://localhost:3000`
+
+   - Health check: `http://localhost:3000/health`
+   - OpenAPI spec: `http://localhost:3000/api/openapi.yaml`
+
+3. **Start the frontend** (in a new terminal):
+   ```cmd
+   npm run dev:web
+   ```
+   The Angular app will start on `http://localhost:4200`
+
+### Build for Production
+
+- **Backend**: `npm run build:api`
+- **Frontend**: `npm run build:web`
+
+### SDK Generation
+
+Once APIs are defined in the OpenAPI spec, generate the TypeScript SDK:
+
+```cmd
+npm run gen:sdk
+```
+
+_(Note: OpenAPI generator needs to be installed separately when ready to generate)_
+
 ## 📖 Documentation
 
-This repository contains detailed documentation for the Health Buddy project, organized by development phases and feature areas.
+This repository contains detailed documentation for the Health Companion project, organized by development phases and feature areas.
 
 ### 📋 Project Overview
 

@@ -20,11 +20,13 @@
 
 ---
 
-## 2) Repository Structure
+## 2) Repository Structure & Tech Stack
+
+**IMPORTANT:** This project uses **Express + TypeScript** (NOT NestJS) and **npm** (NOT yarn).
 
 ```
 /apps
-/backend # NestJS (TypeScript)
+/backend # Express + TypeScript (NOT NestJS)
 /src
 /modules # DDD bounded contexts
 /auth /users /nutrition /biometrics /companion /dashboard
@@ -54,14 +56,15 @@ technical-architecture-v2.md
 
 1. **Read the feature spec** under `/documents/features/v1/...`.
 2. **Update `openapi.yaml`** with paths/schemas for this feature only.
-3. Run **SDK generation**: `yarn gen:sdk` (or `npm run gen:sdk`). Commit changes in `/packages/sdk`.
-4. **Backend (NestJS)**:
-   - Add controller → service → repository within the corresponding module.
-   - Add DTOs with `class-validator` + `class-transformer`.
+3. Run **SDK generation**: `npm run gen:sdk` (NOT yarn). Commit changes in `/packages/sdk`.
+4. **Backend (Express + TypeScript)**:
+   - Add routes → controllers → services within the corresponding module.
+   - Add input validation and DTOs.
    - Implement domain logic **in services** (backend-heavy). The frontend stays thin.
-   - Persist via Prisma/TypeORM (Postgres). Write a migration for new tables/fields.
-   - Add unit tests for services; integration test for controller.
+   - Persist via chosen ORM (Postgres). Write migrations for new tables/fields.
+   - Add unit tests for services; integration test for routes.
 5. **Frontend (Angular standalone)**:
+   - Create components as **3 separate files**: `.ts`, `.html`, `.scss` (never inline).
    - Create a feature component under `/features/<module>`.
    - Use the **generated SDK** for API calls (no handwritten fetch).
    - Implement optimistic UI for offline-first flows when the spec requires.
@@ -80,19 +83,21 @@ technical-architecture-v2.md
 - Use **functional, side-effect-free** helpers; avoid static singletons.
 - Prefer composition over inheritance.
 
-### 4.2 NestJS (Backend)
+### 4.2 Express Backend (NOT NestJS)
 
 - Modules mirror DDD contexts: `nutrition`, `biometrics`, `companion`, `dashboard`, etc.
-- Controllers: **thin** (validation + mapping only).  
+- Routes: **thin** (validation + mapping only).  
   Services: business logic.  
-  Repositories: data access (Prisma/TypeORM).
-- DTOs: `class-validator` for all request bodies & params.
+  Repositories: data access.
+- Input validation for all request bodies & params.
 - Errors: return envelope `{ error: { code, message } }` with appropriate HTTP status.
-- Logging: pino/winston with request IDs (middleware).
+- Logging: pino with request IDs (middleware).
+- **Swagger UI**: Available at `/api/docs` for interactive API documentation.
 
 ### 4.3 Angular (Frontend)
 
 - **Standalone components**; feature-first structure under `/features`.
+- **ALWAYS split components into 3 files**: `.ts`, `.html`, `.scss` (never use inline templates/styles).
 - State per feature (signals or minimal NgRx if needed). Avoid global mega-stores.
 - Use the **generated SDK** for all HTTP. Handle errors with a global interceptor.
 - Accessibility: aria-labels, keyboard focus, 44px min targets. Dark/light theme support.
@@ -154,6 +159,25 @@ technical-architecture-v2.md
   - `openapi.yaml` invalid or changed without regenerated SDK.
   - Tests fail or coverage drops below baseline.
 - Optional: Docker build of backend.
+
+---
+
+## 8) Development Best Practices & Ownership
+
+**Critical Guidelines:**
+
+- **Target correct folders**: Always ensure commands run in the right directory (`apps/backend`, `apps/frontend`, etc.)
+- **Never get stuck on app execution**: If asked to test something, use `npm run build` instead of running servers
+- **Don't over-engineer**: Ask for clarification rather than guessing requirements
+- **Avoid rabbit holes**: If something seems complex or unclear, ask or add to backlog
+- **Owner-driven development**: The human owns the code - ask understanding questions rather than making assumptions
+
+**When testing/validation is needed:**
+
+- Backend: `cd apps/backend && npm run build`
+- Frontend: `cd apps/frontend && npm run build`
+- Never start dev servers unless explicitly requested
+- Use build commands to validate code correctness
 
 ---
 

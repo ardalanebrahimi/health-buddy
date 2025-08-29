@@ -1,0 +1,23 @@
+{
+  "name": "health-companion",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --prefix apps/backend run dev",
+    "dev:web": "npm --prefix apps/frontend run start",
+    "build:api": "npm --prefix apps/backend run build",
+    "build:web": "npm --prefix apps/frontend run build",
+    "gen:sdk": "npm --prefix apps/backend run gen:sdk",
+    "install:all": "npm install && npm --prefix apps/backend install && npm --prefix apps/frontend install && npm --prefix packages/sdk install && npm --prefix packages/domain-models install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

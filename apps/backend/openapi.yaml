@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Health Companion API
+  version: 0.1.0
+  description: API for the Health Companion application
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                required:
+                  - status
