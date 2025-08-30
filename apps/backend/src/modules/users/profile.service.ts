@@ -10,6 +10,12 @@ export interface CreateProfileDto {
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'active';
 }
 
+export interface UpdateBaselineDto {
+  conditions?: string[];
+  painAreas?: string[];
+  notes?: string | null;
+}
+
 export interface ProfileDto {
   id: string;
   userId: string;
@@ -68,6 +74,37 @@ export class ProfileService {
         heightCm: data.heightCm,
         weightKg: data.weightKg,
         activityLevel: data.activityLevel,
+      },
+    });
+
+    return {
+      id: profile.id,
+      userId: profile.userId,
+      age: profile.age!,
+      sex: profile.sex!,
+      heightCm: profile.heightCm!,
+      weightKg: Number(profile.weightKg!),
+      activityLevel: profile.activityLevel!,
+      baselineJson: profile.baselineJson,
+      createdAt: profile.createdAt,
+      updatedAt: profile.updatedAt,
+    };
+  }
+
+  static async updateBaseline(
+    userId: string,
+    data: UpdateBaselineDto
+  ): Promise<ProfileDto> {
+    const baselineData = {
+      conditions: data.conditions || [],
+      painAreas: data.painAreas || [],
+      notes: data.notes || null,
+    };
+
+    const profile = await prisma.profile.update({
+      where: { userId: this.SINGLE_USER_ID },
+      data: {
+        baselineJson: baselineData,
       },
     });
 

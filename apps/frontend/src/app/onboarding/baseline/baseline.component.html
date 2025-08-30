@@ -1,0 +1,109 @@
+<div class="baseline-container">
+  <header class="header">
+    <h1>Baseline Health Assessment</h1>
+    <p>
+      Let us know about your current health conditions and any areas of pain or
+      discomfort.
+    </p>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="baseline-form">
+    <!-- Known Conditions Section -->
+    <section class="form-section">
+      <h2>Known Health Conditions</h2>
+      <p class="section-description">
+        Select any conditions that apply to you (optional):
+      </p>
+
+      <div class="checkbox-grid">
+        <label
+          *ngFor="let condition of availableConditions"
+          class="checkbox-item"
+          [class.checked]="isConditionSelected(condition)"
+        >
+          <input
+            type="checkbox"
+            [value]="condition"
+            [checked]="isConditionSelected(condition)"
+            (change)="onToggleCondition(condition, $event)"
+          />
+          <span class="checkbox-label">{{ getDisplayName(condition) }}</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Pain Areas Section -->
+    <section class="form-section">
+      <h2>Areas of Pain or Discomfort</h2>
+      <p class="section-description">
+        Select any areas where you experience pain or discomfort (optional):
+      </p>
+
+      <div class="checkbox-grid">
+        <label
+          *ngFor="let painArea of availablePainAreas"
+          class="checkbox-item"
+          [class.checked]="isPainAreaSelected(painArea)"
+        >
+          <input
+            type="checkbox"
+            [value]="painArea"
+            [checked]="isPainAreaSelected(painArea)"
+            (change)="onTogglePainArea(painArea, $event)"
+          />
+          <span class="checkbox-label">{{ getDisplayName(painArea) }}</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Notes Section -->
+    <section class="form-section">
+      <h2>Additional Notes</h2>
+      <p class="section-description">
+        Any additional information about your health that would be helpful
+        (optional):
+      </p>
+
+      <div class="textarea-wrapper">
+        <textarea
+          formControlName="notes"
+          placeholder="e.g., Chronic back pain that's worse in the morning, recent surgery, etc."
+          rows="4"
+          class="notes-textarea"
+          [class.error]="
+            form.get('notes')?.invalid && form.get('notes')?.touched
+          "
+        ></textarea>
+
+        <div class="character-count">
+          {{ notesCharacterCount }}/500 characters
+        </div>
+
+        <div
+          *ngIf="form.get('notes')?.invalid && form.get('notes')?.touched"
+          class="error-message"
+        >
+          Notes must be 500 characters or less
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="save-button"
+        [disabled]="form.invalid || isLoading"
+        [class.loading]="isLoading"
+      >
+        <span *ngIf="!isLoading">Save & Continue</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+
+      <p class="help-text">
+        Don't worry, you can update this information later in your profile
+        settings.
+      </p>
+    </div>
+  </form>
+</div>

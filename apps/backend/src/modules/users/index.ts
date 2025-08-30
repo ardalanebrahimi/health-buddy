@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { ProfileService } from './profile.service';
-import { validateCreateProfile } from './profile.validation';
+import {
+  validateCreateProfile,
+  validateUpdateBaseline,
+} from './profile.validation';
 
 const router = Router();
 
@@ -70,6 +73,38 @@ router.put('/profile', (req, res) => {
   };
 
   res.json(updatedProfile);
+});
+
+// PATCH /profile/baseline - Update user baseline health information
+router.patch('/profile/baseline', async (req, res) => {
+  try {
+    // Validate request body
+    const validationResult = validateUpdateBaseline(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input provided',
+          details: validationResult.errors,
+        },
+      });
+    }
+
+    const profile = await ProfileService.updateBaseline(
+      'single-user-v1',
+      req.body
+    );
+    res.json(profile);
+  } catch (error) {
+    console.error('Error updating baseline:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to update baseline',
+      },
+    });
+  }
 });
 
 // GET /goals - Get user goals

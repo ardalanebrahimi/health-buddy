@@ -112,6 +112,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /profile/baseline:
+    patch:
+      tags:
+        - profile
+      summary: Update baseline health information
+      description: Update the current user's baseline health conditions and pain areas
+      operationId: updateBaseline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBaselineRequest'
+      responses:
+        '200':
+          description: Baseline updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /goals:
     get:
       tags:
@@ -559,7 +586,26 @@ components:
         baselineJson:
           type: object
           nullable: true
-          description: 'Baseline health information for UP-002'
+          description: 'Baseline health information including conditions, pain areas, and notes'
+          properties:
+            conditions:
+              type: array
+              items:
+                type: string
+              description: Known health conditions
+            painAreas:
+              type: array
+              items:
+                type: string
+              description: Areas of pain or discomfort
+            notes:
+              type: string
+              nullable: true
+              description: Additional notes about baseline health
+          example:
+            conditions: ['overweight', 'diabetes']
+            painAreas: ['lower_back', 'shoulders']
+            notes: 'Chronic back pain, especially in the morning'
         createdAt:
           type: string
           format: date-time
@@ -648,6 +694,29 @@ components:
               extremely_active,
             ]
           example: moderately_active
+
+    UpdateBaselineRequest:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            type: string
+          description: Known health conditions
+          example: ['overweight', 'diabetes', 'hypertension']
+        painAreas:
+          type: array
+          items:
+            type: string
+            enum: ['lower_back', 'shoulders', 'elbows', 'coccyx', 'other']
+          description: Areas of pain or discomfort
+          example: ['lower_back', 'shoulders']
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Additional notes about baseline health
+          example: 'Chronic back pain, especially in the morning'
 
     GoalsResponse:
       type: object

@@ -23,6 +23,12 @@ export interface CreateProfileDto {
   activityLevel: "sedentary" | "light" | "moderate" | "active";
 }
 
+export interface UpdateBaselineDto {
+  conditions?: string[];
+  painAreas?: string[];
+  notes?: string | null;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -81,6 +87,46 @@ export class ProfileService {
 
       await this.setLocalMirror(tempProfile);
       this.profileSubject.next(tempProfile);
+    }
+  }
+
+  async updateBaseline(dto: UpdateBaselineDto): Promise<void> {
+    try {
+      const updatedProfile = await this.apiService.updateBaseline(dto);
+      if (updatedProfile) {
+        const typedProfile = updatedProfile as ProfileDto;
+        await this.setLocalMirror(typedProfile);
+        this.profileSubject.next(typedProfile);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to update baseline, enqueueing for later sync:",
+        error
+      );
+
+      // Update local mirror with baseline data
+      const currentProfile = this.getLocalMirror();
+      if (currentProfile) {
+        const updatedProfile = {
+          ...currentProfile,
+          baselineJson: {
+            conditions: dto.conditions || [],
+            painAreas: dto.painAreas || [],
+            notes: dto.notes || null,
+          },
+          updatedAt: new Date().toISOString(),
+        };
+
+        await this.setLocalMirror(updatedProfile);
+        this.profileSubject.next(updatedProfile);
+      }
+
+      // Queue for sync when online
+      await this.enqueueSync({
+        type: "updateBaseline",
+        data: dto,
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 

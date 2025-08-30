@@ -48,6 +48,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "onboarding/goals",
+    loadComponent: () =>
+      import("./onboarding/goals/goals.component").then(
+        (m) => m.GoalsComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Protected routes (require unlock and complete profile)
   {

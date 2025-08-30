@@ -47,6 +47,15 @@ export class ApiService {
     }
   }
 
+  async updateBaseline(data: any) {
+    try {
+      return await this.client.updateBaseline(data);
+    } catch (error) {
+      console.error("Failed to update baseline:", error);
+      throw error;
+    }
+  }
+
   async getNutritionSummary(date?: string, period?: "daily" | "weekly") {
     try {
       return await this.client.getNutritionSummary({ date, period });
