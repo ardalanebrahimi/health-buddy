@@ -80,6 +80,7 @@
 ### Frontend (Angular)
 
 - **Always 3 files**: `.ts`, `.html`, `.scss` (never inline)
+- **Component organization**: Each component in its own folder with 3 separate files
 - Feature-first structure under `/features/<module>`
 - Use generated SDK for all API calls
 - Standalone components preferred

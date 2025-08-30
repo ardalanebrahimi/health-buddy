@@ -4,6 +4,34 @@
   padding: 20px;
 }
 
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header-section h2 {
+  margin: 0;
+}
+
+.settings-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #007bff;
+  border-radius: 6px;
+  background: transparent;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
 .status-section {
   margin-top: 2rem;
   padding: 1rem;

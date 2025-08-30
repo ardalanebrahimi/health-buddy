@@ -1,0 +1,275 @@
+.lock-screen-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: var(--background-color, #f5f5f5);
+}
+
+.lock-screen-card {
+  background: var(--card-background, white);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.lock-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #333);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+}
+
+.pin-input-container {
+  margin-bottom: 2rem;
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color, #ddd);
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.pin-dot.filled {
+  background: var(--primary-color, #007bff);
+  border-color: var(--primary-color, #007bff);
+}
+
+.pin-dot.error {
+  background: var(--error-color, #dc3545);
+  border-color: var(--error-color, #dc3545);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.pin-input-hidden {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  max-width: 240px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.keypad-btn {
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 50%;
+  background: var(--keypad-background, #f8f9fa);
+  color: var(--text-primary, #333);
+  font-size: 1.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+}
+
+.keypad-btn:hover:not(:disabled) {
+  background: var(--keypad-hover, #e9ecef);
+  transform: scale(1.05);
+}
+
+.keypad-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.keypad-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.keypad-delete {
+  grid-column: span 3;
+  border-radius: 12px;
+  width: auto;
+}
+
+.biometric-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--primary-color, #007bff);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary-color, #007bff);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.biometric-btn:hover:not(:disabled) {
+  background: var(--primary-color, #007bff);
+  color: white;
+}
+
+.biometric-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message,
+.cooldown-message {
+  color: var(--error-color, #dc3545);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--error-background, #f8d7da);
+  border-radius: 8px;
+}
+
+.attempts-left {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.cooldown-message {
+  background: var(--warning-background, #fff3cd);
+  color: var(--warning-color, #856404);
+}
+
+.reset-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #eee);
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #666);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.reset-btn:hover:not(:disabled) {
+  color: var(--error-color, #dc3545);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-background, white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin: 0 0 1rem 0;
+  color: var(--error-color, #dc3545);
+}
+
+.modal-content p {
+  margin: 0.5rem 0;
+  color: var(--text-primary, #333);
+  line-height: 1.4;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background: var(--secondary-color, #6c757d);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: var(--secondary-hover, #545862);
+}
+
+.btn-danger {
+  background: var(--error-color, #dc3545);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--error-hover, #c82333);
+}
+
+@media (max-width: 480px) {
+  .lock-screen-card {
+    padding: 1.5rem;
+  }
+
+  .keypad-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.1rem;
+  }
+}

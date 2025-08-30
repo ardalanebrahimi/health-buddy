@@ -1,0 +1,90 @@
+<div class="pin-setup-container">
+  <div class="pin-setup-card">
+    <h1>{{ stepTitle }}</h1>
+    <p class="subtitle">{{ stepSubtitle }}</p>
+
+    <!-- PIN Entry -->
+    <div class="pin-input-container">
+      <div class="pin-dots">
+        <div
+          *ngFor="let dot of pinDots; let i = index"
+          class="pin-dot"
+          [class.filled]="i < currentPin.length"
+        ></div>
+      </div>
+
+      <input
+        type="password"
+        class="pin-input-hidden"
+        [(ngModel)]="currentPin"
+        (input)="onPinInput()"
+        maxlength="6"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        aria-label="Enter PIN"
+      />
+    </div>
+
+    <!-- Keypad -->
+    <div class="keypad">
+      <button
+        *ngFor="let num of keypadNumbers"
+        type="button"
+        class="keypad-btn"
+        (click)="onKeypadPress(num)"
+        [attr.aria-label]="'Press ' + num"
+      >
+        {{ num }}
+      </button>
+      <button
+        type="button"
+        class="keypad-btn keypad-delete"
+        (click)="onDelete()"
+        [disabled]="currentPin.length === 0"
+        aria-label="Delete"
+      >
+        ⌫
+      </button>
+    </div>
+
+    <!-- Biometrics Option -->
+    <div
+      *ngIf="step === 'confirm' && biometricsAvailable"
+      class="biometrics-section"
+    >
+      <label class="biometrics-toggle">
+        <input
+          type="checkbox"
+          [(ngModel)]="enableBiometrics"
+          aria-label="Enable biometric authentication"
+        />
+        <span>Enable {{ biometryDescription }}</span>
+      </label>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button
+        *ngIf="step === 'confirm'"
+        type="button"
+        class="btn btn-secondary"
+        (click)="goBack()"
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onContinue()"
+        [disabled]="currentPin.length < 4"
+      >
+        {{ continueButtonText }}
+      </button>
+    </div>
+  </div>
+</div>

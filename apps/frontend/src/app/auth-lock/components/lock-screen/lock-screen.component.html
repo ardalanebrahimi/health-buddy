@@ -1,0 +1,115 @@
+<div class="lock-screen-container">
+  <div class="lock-screen-card">
+    <div class="lock-icon">🔒</div>
+
+    <h1>Health Companion is Locked</h1>
+    <p class="subtitle">Enter your PIN to continue</p>
+
+    <!-- PIN Entry -->
+    <div class="pin-input-container">
+      <div class="pin-dots">
+        <div
+          *ngFor="let dot of pinDots; let i = index"
+          class="pin-dot"
+          [class.filled]="i < currentPin.length"
+          [class.error]="hasError && i < currentPin.length"
+        ></div>
+      </div>
+
+      <input
+        type="password"
+        class="pin-input-hidden"
+        [(ngModel)]="currentPin"
+        (input)="onPinInput()"
+        maxlength="6"
+        pattern="[0-9]*"
+        inputmode="numeric"
+        aria-label="Enter PIN to unlock"
+        #pinInput
+      />
+    </div>
+
+    <!-- Keypad -->
+    <div class="keypad">
+      <button
+        *ngFor="let num of keypadNumbers"
+        type="button"
+        class="keypad-btn"
+        (click)="onKeypadPress(num)"
+        [disabled]="isProcessing"
+        [attr.aria-label]="'Press ' + num"
+      >
+        {{ num }}
+      </button>
+      <button
+        type="button"
+        class="keypad-btn keypad-delete"
+        (click)="onDelete()"
+        [disabled]="currentPin.length === 0 || isProcessing"
+        aria-label="Delete"
+      >
+        ⌫
+      </button>
+    </div>
+
+    <!-- Biometric Button -->
+    <button
+      *ngIf="biometricsEnabled && biometricsAvailable"
+      type="button"
+      class="biometric-btn"
+      (click)="unlockWithBiometrics()"
+      [disabled]="isProcessing"
+    >
+      Use {{ biometryDescription }}
+    </button>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message" role="alert">
+      {{ errorMessage }}
+      <span
+        *ngIf="attemptsLeft > 0 && attemptsLeft < maxAttempts"
+        class="attempts-left"
+      >
+        {{ attemptsLeft }} attempts remaining
+      </span>
+    </div>
+
+    <!-- Cooldown Message -->
+    <div *ngIf="cooldownSeconds > 0" class="cooldown-message" role="alert">
+      Too many attempts. Try again in {{ cooldownSeconds }} seconds.
+    </div>
+
+    <!-- Reset Option -->
+    <div *ngIf="showResetOption" class="reset-section">
+      <button
+        type="button"
+        class="reset-btn"
+        (click)="confirmReset()"
+        [disabled]="isProcessing"
+      >
+        Forgot PIN? Reset App
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div *ngIf="showResetConfirm" class="modal-overlay" (click)="cancelReset()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Reset App Data</h2>
+    <p>
+      This will erase all your health data and settings. This action cannot be
+      undone.
+    </p>
+    <p><strong>Are you sure you want to continue?</strong></p>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancelReset()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-danger" (click)="performReset()">
+        Reset App Data
+      </button>
+    </div>
+  </div>
+</div>

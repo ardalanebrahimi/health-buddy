@@ -1,0 +1,188 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()"
+      aria-label="Go back"
+    >
+      ← Back
+    </button>
+    <h1>Security Settings</h1>
+  </div>
+
+  <div class="settings-content">
+    <!-- Current Status -->
+    <div class="status-section">
+      <h2>Current Status</h2>
+      <div class="status-item">
+        <span class="status-label">PIN:</span>
+        <span class="status-value">Set</span>
+      </div>
+      <div class="status-item" *ngIf="lastUnlock">
+        <span class="status-label">Last unlock:</span>
+        <span class="status-value">{{ formatLastUnlock(lastUnlock) }}</span>
+      </div>
+    </div>
+
+    <!-- Biometric Settings -->
+    <div class="settings-section" *ngIf="biometricsAvailable">
+      <h2>Biometric Authentication</h2>
+      <div class="setting-item">
+        <label class="setting-toggle">
+          <input
+            type="checkbox"
+            [(ngModel)]="biometricsEnabled"
+            (change)="onBiometricsToggle()"
+            [disabled]="isLoading"
+          />
+          <span class="toggle-text"> Enable {{ biometryDescription }} </span>
+        </label>
+        <p class="setting-description">
+          Use your {{ biometryDescription.toLowerCase() }} to unlock the app
+          instead of entering your PIN.
+        </p>
+      </div>
+    </div>
+
+    <!-- Lock Timeout Settings -->
+    <div class="settings-section">
+      <h2>Auto-lock Timeout</h2>
+      <div class="setting-item">
+        <label for="timeout-select">Lock app after:</label>
+        <select
+          id="timeout-select"
+          [(ngModel)]="selectedTimeout"
+          (change)="onTimeoutChange()"
+          [disabled]="isLoading"
+          class="timeout-select"
+        >
+          <option *ngFor="let option of timeoutOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <p class="setting-description">
+          The app will automatically lock after this period of inactivity.
+        </p>
+      </div>
+    </div>
+
+    <!-- Change PIN -->
+    <div class="settings-section">
+      <h2>Change PIN</h2>
+      <div class="setting-item">
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="startChangePIN()"
+          [disabled]="isLoading || isChangingPIN"
+        >
+          Change PIN
+        </button>
+        <p class="setting-description">
+          Update your PIN for enhanced security.
+        </p>
+      </div>
+    </div>
+
+    <!-- Change PIN Form -->
+    <div *ngIf="isChangingPIN" class="change-pin-form">
+      <h3>Change PIN</h3>
+
+      <div class="form-step" *ngIf="changePINStep === 'current'">
+        <label for="current-pin">Enter current PIN:</label>
+        <input
+          type="password"
+          id="current-pin"
+          [(ngModel)]="currentPINInput"
+          (input)="onCurrentPINInput()"
+          maxlength="6"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          class="pin-input"
+          placeholder="Current PIN"
+        />
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="verifyCurrentPIN()"
+          [disabled]="currentPINInput.length < 4 || isLoading"
+        >
+          Continue
+        </button>
+      </div>
+
+      <div class="form-step" *ngIf="changePINStep === 'new'">
+        <label for="new-pin">Enter new PIN:</label>
+        <input
+          type="password"
+          id="new-pin"
+          [(ngModel)]="newPINInput"
+          (input)="onNewPINInput()"
+          maxlength="6"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          class="pin-input"
+          placeholder="New PIN (4-6 digits)"
+        />
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmNewPIN()"
+          [disabled]="newPINInput.length < 4 || isLoading"
+        >
+          Continue
+        </button>
+      </div>
+
+      <div class="form-step" *ngIf="changePINStep === 'confirm'">
+        <label for="confirm-pin">Confirm new PIN:</label>
+        <input
+          type="password"
+          id="confirm-pin"
+          [(ngModel)]="confirmPINInput"
+          (input)="onConfirmPINInput()"
+          maxlength="6"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          class="pin-input"
+          placeholder="Confirm new PIN"
+        />
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelChangePIN()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="saveNewPIN()"
+            [disabled]="confirmPINInput.length < 4 || isLoading"
+          >
+            Save PIN
+          </button>
+        </div>
+      </div>
+
+      <!-- PIN Change Error -->
+      <div *ngIf="changePINError" class="error-message" role="alert">
+        {{ changePINError }}
+      </div>
+    </div>
+
+    <!-- General Error/Success Messages -->
+    <div *ngIf="errorMessage" class="error-message" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message" role="status">
+      {{ successMessage }}
+    </div>
+  </div>
+</div>
