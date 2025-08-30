@@ -51,7 +51,24 @@
 
 ---
 
-## 6) Essential Coding Standards
+## 6) Documentation Organization
+
+- **Keep root clean**: Never create implementation docs in project root directory
+- **Feature documentation**: Place all implementation docs in `/documents/Version 1 – MVP/features/<module>/`
+- **Implementation artifacts**: Use naming pattern `<TICKET-ID>-IMPLEMENTATION.md` for detailed checklists
+- **Summary docs**: Use `<TICKET-ID>-SUMMARY.md` for high-level overviews
+- **Technical guides**: Database setup guides belong in `apps/backend/README_*.md`
+- **Example structure**:
+  ```
+  documents/Version 1 – MVP/features/cross/
+  ├── CX-003-data-models-and-migrations.md     # Original spec
+  ├── CX-003-IMPLEMENTATION.md                 # Implementation details
+  └── CX-003-IMPLEMENTATION-SUMMARY.md         # High-level summary
+  ```
+
+---
+
+## 7) Essential Coding Standards
 
 ### Backend (Express + TypeScript)
 
@@ -75,7 +92,7 @@
 
 ---
 
-## 7) Commands & Validation
+## 8) Commands & Validation
 
 ```bash
 # SDK Generation (after OpenAPI changes)
@@ -88,7 +105,7 @@ cd apps/frontend && npm run build
 
 ---
 
-## 8) When in Doubt
+## 9) When in Doubt
 
 - Check feature spec first, then PRD V1 and architecture docs
 - Ask for spec clarification rather than guessing APIs

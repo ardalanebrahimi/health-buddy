@@ -39,6 +39,39 @@ A comprehensive health tracking application designed to help users monitor their
 - **Backend**: `npm run build:api`
 - **Frontend**: `npm run build:web`
 
+### Database Setup
+
+The backend uses PostgreSQL with Prisma ORM. Follow these steps to set up the database:
+
+1. **Install and start PostgreSQL**
+
+   - Ensure PostgreSQL is running on your system
+   - Create a database named `health_companion` (or your preferred name)
+
+2. **Configure database connection**
+
+   ```cmd
+   # Copy example environment file in backend directory
+   cd apps/backend
+   copy .env.example .env
+   ```
+
+   Update `DATABASE_URL` in `apps/backend/.env`:
+
+   ```
+   DATABASE_URL="postgresql://username:password@localhost:5432/health_companion?schema=public"
+   ```
+
+3. **Setup database schema**
+   ```cmd
+   # From the backend directory
+   npm run db:generate    # Generate Prisma client
+   npm run db:migrate     # Run database migrations
+   npm run db:seed        # Seed with demo data (optional)
+   ```
+
+For detailed database documentation, see [apps/backend/README_DB.md](apps/backend/README_DB.md).
+
 ### SDK Generation
 
 Once APIs are defined in the OpenAPI spec, generate the TypeScript SDK:

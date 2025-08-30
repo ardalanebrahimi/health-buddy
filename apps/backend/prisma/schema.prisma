@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MealStatus {
+  draft
+  recognized
+  final
+}
+
+model Profile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  sex           String?
+  age           Int?
+  heightCm      Int?
+  weightKg      Decimal? @db.Decimal(5, 1)
+  activityLevel String?
+  baselineJson  Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  Goal Goal?
+
+  @@index([userId])
+  @@map("profiles")
+}
+
+model Goal {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  weightGoalKg      Decimal? @db.Decimal(5, 1)
+  proteinTargetG    Int?
+  calorieTargetKcal Int?
+  sleepHoursTarget  Int?
+  painTarget        Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  Profile Profile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("goals")
+}
+
+model Meal {
+  id         String     @id @default(uuid())
+  userId     String
+  takenAt    DateTime?
+  status     MealStatus @default(draft)
+  totalsJson Json?
+  notes      String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  items MealItem[]
+  photo MealPhoto?
+
+  @@index([userId, takenAt])
+  @@map("meals")
+}
+
+model MealItem {
+  id           String   @id @default(uuid())
+  mealId       String
+  name         String
+  portionGrams Float?
+  calories     Float?
+  protein      Float?
+  carbs        Float?
+  fat          Float?
+  confidence   Float?
+  editedByUser Boolean  @default(false)
+
+  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([mealId])
+  @@map("meal_items")
+}
+
+model MealPhoto {
+  mealId   String @id
+  photoUrl String
+  width    Int?
+  height   Int?
+  exifJson Json?
+
+  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@map("meal_photos")
+}
+
+model Hydration {
+  id        String   @id @default(uuid())
+  userId    String
+  amountMl  Int
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("hydration")
+}
+
+model BiometricsWeight {
+  id        String   @id @default(uuid())
+  userId    String
+  valueKg   Decimal  @db.Decimal(5, 1)
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_weight")
+}
+
+model CompanionMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime // store date at midnight UTC for daily uniqueness
+  note      String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("companion_messages")
+}
