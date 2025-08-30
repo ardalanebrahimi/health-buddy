@@ -1,0 +1,219 @@
+import { PrismaClient, MealStatus } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
+import fs from 'fs/promises';
+import path from 'path';
+
+interface CreateMealPhotoData {
+  takenAt?: string;
+  notes?: string;
+  userId: string;
+}
+
+interface FileUpload {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+}
+
+export class NutritionService {
+  constructor(private prisma: PrismaClient) {}
+
+  async createMealWithPhoto(
+    file: FileUpload,
+    data: CreateMealPhotoData
+  ): Promise<{
+    mealId: string;
+    photoUrl: string;
+    status: MealStatus;
+    createdAt: Date;
+  }> {
+    // Validate file
+    this.validateFile(file);
+
+    // Process image (convert HEIC to JPEG, compress)
+    const processedBuffer = await this.processImage(file);
+
+    // Generate unique filename
+    const fileExtension = this.getFileExtension(file.mimetype);
+    const filename = `meal-${uuidv4()}.${fileExtension}`;
+
+    // Store file (for dev, use local uploads directory)
+    const photoUrl = await this.storeFile(processedBuffer, filename);
+
+    // Get image dimensions and EXIF data
+    const metadata = await sharp(processedBuffer).metadata();
+
+    // Create meal and photo records in database
+    const meal = await this.prisma.meal.create({
+      data: {
+        id: uuidv4(),
+        userId: data.userId,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+        status: MealStatus.draft,
+        notes: data.notes,
+        photo: {
+          create: {
+            photoUrl,
+            width: metadata.width,
+            height: metadata.height,
+            exifJson: metadata.exif
+              ? JSON.parse(JSON.stringify(metadata.exif))
+              : null,
+          },
+        },
+      },
+      include: {
+        photo: true,
+      },
+    });
+
+    return {
+      mealId: meal.id,
+      photoUrl: meal.photo!.photoUrl,
+      status: meal.status,
+      createdAt: meal.createdAt,
+    };
+  }
+
+  async getMealById(mealId: string, userId: string) {
+    const meal = await this.prisma.meal.findFirst({
+      where: {
+        id: mealId,
+        userId,
+      },
+      include: {
+        photo: true,
+        items: true,
+      },
+    });
+
+    if (!meal) {
+      return null;
+    }
+
+    return {
+      id: meal.id,
+      name: meal.items.length > 0 ? meal.items[0].name : 'Meal',
+      type: this.inferMealType(meal.takenAt || meal.createdAt),
+      takenAt: meal.takenAt?.toISOString() || meal.createdAt.toISOString(),
+      status: meal.status,
+      totalCalories: meal.items.reduce(
+        (sum, item) => sum + (item.calories || 0),
+        0
+      ),
+      totalProteinGrams: meal.items.reduce(
+        (sum, item) => sum + (item.protein || 0),
+        0
+      ),
+      totalCarbsGrams: meal.items.reduce(
+        (sum, item) => sum + (item.carbs || 0),
+        0
+      ),
+      totalFatGrams: meal.items.reduce((sum, item) => sum + (item.fat || 0), 0),
+      photoUrl: meal.photo?.photoUrl,
+      items: meal.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.portionGrams || 0,
+        unit: 'grams',
+        calories: item.calories || 0,
+        proteinGrams: item.protein || 0,
+        carbsGrams: item.carbs || 0,
+        fatGrams: item.fat || 0,
+        confidence: item.confidence,
+      })),
+      createdAt: meal.createdAt.toISOString(),
+      updatedAt: meal.updatedAt.toISOString(),
+    };
+  }
+
+  private validateFile(file: FileUpload): void {
+    // Check file size (8MB limit)
+    const maxSize = 8 * 1024 * 1024; // 8MB
+    if (file.size > maxSize) {
+      throw new Error('FILE_TOO_LARGE');
+    }
+
+    // Check MIME type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/heic',
+      'image/heif',
+    ];
+    if (!allowedTypes.includes(file.mimetype.toLowerCase())) {
+      throw new Error('UNSUPPORTED_FILE_TYPE');
+    }
+  }
+
+  private async processImage(file: FileUpload): Promise<Buffer> {
+    let buffer = file.buffer;
+
+    // Convert HEIC to JPEG if needed
+    if (
+      file.mimetype.toLowerCase().includes('heic') ||
+      file.mimetype.toLowerCase().includes('heif')
+    ) {
+      // Note: heic-convert would be used here
+      // For now, we'll throw an error as HEIC conversion requires special handling
+      throw new Error('HEIC_CONVERSION_NOT_IMPLEMENTED');
+    }
+
+    // Compress and resize image
+    try {
+      buffer = await sharp(buffer)
+        .resize(2048, 2048, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+    } catch (error) {
+      throw new Error('IMAGE_PROCESSING_FAILED');
+    }
+
+    return buffer;
+  }
+
+  private getFileExtension(mimetype: string): string {
+    switch (mimetype.toLowerCase()) {
+      case 'image/jpeg':
+      case 'image/jpg':
+        return 'jpg';
+      case 'image/png':
+        return 'png';
+      case 'image/heic':
+      case 'image/heif':
+        return 'jpg'; // Convert to JPG
+      default:
+        return 'jpg';
+    }
+  }
+
+  private async storeFile(buffer: Buffer, filename: string): Promise<string> {
+    // For development, store in local uploads directory
+    const uploadsDir = path.join(__dirname, '../../../../uploads');
+
+    // Ensure uploads directory exists
+    try {
+      await fs.access(uploadsDir);
+    } catch {
+      await fs.mkdir(uploadsDir, { recursive: true });
+    }
+
+    const filePath = path.join(uploadsDir, filename);
+    await fs.writeFile(filePath, buffer);
+
+    // Return URL (in production, this would be S3/GCS URL)
+    return `http://localhost:3000/uploads/${filename}`;
+  }
+
+  private inferMealType(date: Date): string {
+    const hour = date.getHours();
+
+    if (hour >= 5 && hour < 11) return 'breakfast';
+    if (hour >= 11 && hour < 16) return 'lunch';
+    if (hour >= 16 && hour < 22) return 'dinner';
+    return 'snack';
+  }
+}

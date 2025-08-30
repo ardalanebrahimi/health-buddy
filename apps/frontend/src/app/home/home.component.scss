@@ -77,6 +77,83 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.navigation-section {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.module-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  color: #2c3e50;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.module-btn:not(:disabled):hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.module-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+.module-btn .icon {
+  font-size: 2rem;
+}
+
+.module-btn span {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.module-btn small {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+}
+
+.nutrition {
+  border-color: #27ae60;
+}
+
+.nutrition:not(:disabled):hover {
+  border-color: #27ae60;
+  background-color: #eafaf1;
+}
+
+.biometrics {
+  border-color: #e74c3c;
+}
+
+.dashboard {
+  border-color: #f39c12;
+}
+
+.companion {
+  border-color: #9b59b6;
+}
+
 .sdk-demo-section {
   margin-top: 30px;
   text-align: left;

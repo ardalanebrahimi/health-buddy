@@ -27,6 +27,32 @@
     </button>
   </div>
 
+  <div class="navigation-section">
+    <h3>App Modules</h3>
+    <div class="module-grid">
+      <button class="module-btn nutrition" routerLink="/nutrition">
+        <div class="icon">🍎</div>
+        <span>Nutrition</span>
+        <small>Track meals with photos</small>
+      </button>
+      <button class="module-btn biometrics" disabled>
+        <div class="icon">📊</div>
+        <span>Biometrics</span>
+        <small>Coming soon</small>
+      </button>
+      <button class="module-btn dashboard" disabled>
+        <div class="icon">📈</div>
+        <span>Dashboard</span>
+        <small>Coming soon</small>
+      </button>
+      <button class="module-btn companion" disabled>
+        <div class="icon">🤖</div>
+        <span>AI Companion</span>
+        <small>Coming soon</small>
+      </button>
+    </div>
+  </div>
+
   <div class="sdk-demo-section" *ngIf="apiStatus === 'ok'">
     <h3>SDK Demo - Daily Summary</h3>
     <div *ngIf="dailySummary" class="summary-card">

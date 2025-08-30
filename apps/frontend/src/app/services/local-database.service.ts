@@ -14,6 +14,19 @@ export interface LocalGoals {
   lastUpdated: string; // ISO string
 }
 
+export interface LocalMeal {
+  id?: number;
+  mealId?: string; // Server ID once synced
+  photoPath: string;
+  takenAt?: string;
+  notes?: string;
+  status: "draft" | "pending_sync" | "synced";
+  createdAt: string;
+  syncAttempts: number;
+  lastSyncAttempt?: string;
+  errorMessage?: string;
+}
+
 export interface SyncQueueItem {
   id: string;
   method: "POST" | "PUT" | "PATCH";
@@ -27,14 +40,16 @@ export interface SyncQueueItem {
 export class LocalDatabase extends Dexie {
   profiles!: Table<LocalProfile>;
   goals!: Table<LocalGoals>;
+  meals!: Table<LocalMeal>;
   syncQueue!: Table<SyncQueueItem>;
 
   constructor() {
     super("HealthBuddyLocalDB");
 
-    this.version(1).stores({
+    this.version(2).stores({
       profiles: "id, pending_sync, lastUpdated",
       goals: "id, pending_sync, lastUpdated",
+      meals: "++id, mealId, status, createdAt",
       syncQueue: "id, timestamp, retryCount",
     });
   }

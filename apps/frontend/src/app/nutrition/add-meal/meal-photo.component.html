@@ -1,0 +1,84 @@
+<div class="meal-photo-container">
+  <header>
+    <h1>Add Meal Photo</h1>
+    <button class="cancel-btn" (click)="cancel()">Cancel</button>
+  </header>
+
+  <!-- Photo Options -->
+  <div class="photo-options" *ngIf="showOptions && !photo">
+    <h2>Choose Photo Source</h2>
+    <div class="options-grid">
+      <button class="option-btn camera" (click)="pickPhoto('camera')">
+        <div class="icon">📷</div>
+        <span>Take Photo</span>
+      </button>
+      <button class="option-btn gallery" (click)="pickPhoto('gallery')">
+        <div class="icon">🖼️</div>
+        <span>Choose from Gallery</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Photo Preview -->
+  <div class="photo-preview" *ngIf="photo && !showOptions">
+    <div class="preview-container">
+      <img [src]="photo.webPath" alt="Meal photo" class="meal-image" />
+      <button class="retake-btn" (click)="retakePhoto()">Retake Photo</button>
+    </div>
+
+    <!-- Notes Input -->
+    <div class="notes-section">
+      <label for="notes">Notes (optional)</label>
+      <textarea
+        id="notes"
+        [formControl]="notes"
+        placeholder="Add any notes about this meal..."
+        maxlength="500"
+        rows="3"
+      >
+      </textarea>
+      <div class="char-count">{{ notes.value?.length || 0 }}/500</div>
+      <div class="error" *ngIf="notes.invalid && notes.touched">
+        Notes cannot exceed 500 characters
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div class="save-section">
+      <button class="save-btn" [disabled]="!canSave" (click)="saveMeal()">
+        <span *ngIf="!isUploading">Save Meal</span>
+        <span *ngIf="isUploading">Saving...</span>
+      </button>
+
+      <div class="online-status">
+        <span *ngIf="isOnline" class="online">● Online</span>
+        <span *ngIf="!isOnline" class="offline"
+          >● Offline - will sync later</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages">
+    <div class="error-message" *ngIf="errorMessage">
+      ⚠️ {{ errorMessage }}
+      <button
+        *ngIf="errorMessage.includes('device settings')"
+        class="settings-btn"
+        (click)="openSettings()"
+      >
+        Open Settings
+      </button>
+    </div>
+    <div class="success-message" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isUploading">
+    <div class="spinner"></div>
+    <p>Saving meal...</p>
+  </div>
+</div>

@@ -41,6 +41,9 @@ export function createApp() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
+  // Serve uploaded files
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
   // Serve OpenAPI spec
   app.get('/api/openapi.yaml', (req, res) => {
     const openApiPath = path.join(__dirname, '..', 'openapi.yaml');

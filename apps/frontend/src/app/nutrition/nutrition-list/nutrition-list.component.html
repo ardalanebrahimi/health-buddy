@@ -1,0 +1,76 @@
+<div class="nutrition-container">
+  <header>
+    <h1>Nutrition</h1>
+    <div class="header-actions">
+      <div class="sync-status" *ngIf="pendingSyncCount > 0">
+        <span class="pending-badge">{{ pendingSyncCount }} pending sync</span>
+        <button class="sync-btn" (click)="forceSyncAll()" *ngIf="isOnline">
+          Sync Now
+        </button>
+      </div>
+      <button class="add-meal-btn" (click)="addMeal()">+ Add Meal</button>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading meals...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && meals.length === 0">
+    <div class="empty-icon">🍽️</div>
+    <h2>No meals yet</h2>
+    <p>Start tracking your nutrition by adding your first meal photo</p>
+    <button class="add-first-meal-btn" (click)="addMeal()">
+      Add Your First Meal
+    </button>
+  </div>
+
+  <!-- Meals List -->
+  <div class="meals-list" *ngIf="!isLoading && meals.length > 0">
+    <div class="meal-card" *ngFor="let meal of meals; trackBy: trackByMealId">
+      <div class="meal-photo">
+        <img
+          [src]="meal.photoPath"
+          [alt]="'Meal from ' + formatDate(meal.createdAt)"
+          class="thumbnail"
+        />
+        <div class="status-badge" [ngClass]="getStatusClass(meal.status)">
+          {{ getStatusLabel(meal.status) }}
+        </div>
+      </div>
+
+      <div class="meal-details">
+        <div class="meal-time">
+          <span class="date">{{ formatDate(meal.createdAt) }}</span>
+          <span class="time">{{ formatTime(meal.createdAt) }}</span>
+        </div>
+
+        <div class="meal-notes" *ngIf="meal.notes">"{{ meal.notes }}"</div>
+
+        <div class="meal-status">
+          <span *ngIf="meal.status === 'pending_sync'" class="pending-text">
+            Will sync when online
+          </span>
+          <span
+            *ngIf="meal.status === 'synced' && meal.mealId"
+            class="synced-text"
+          >
+            Synced successfully
+          </span>
+          <span *ngIf="meal.errorMessage" class="error-text">
+            Error: {{ meal.errorMessage }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Status -->
+  <div class="network-status">
+    <span *ngIf="isOnline" class="online">● Online</span>
+    <span *ngIf="!isOnline" class="offline">● Offline</span>
+  </div>
+</div>

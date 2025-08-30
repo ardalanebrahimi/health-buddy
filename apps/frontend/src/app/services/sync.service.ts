@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { localDb, SyncQueueItem } from "./local-database.service";
+import { MealApiService } from "./meal-api.service";
+import { localDb, SyncQueueItem, LocalMeal } from "./local-database.service";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -13,7 +14,10 @@ export class SyncService {
   private isSyncingSubject = new BehaviorSubject<boolean>(false);
   public isSyncing$ = this.isSyncingSubject.asObservable();
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private mealApiService: MealApiService
+  ) {
     this.setupConnectivityListeners();
     this.startPeriodicSync();
   }
@@ -123,6 +127,13 @@ export class SyncService {
         }
         break;
 
+      case "/meals/photo":
+        if (item.method === "POST") {
+          await this.syncMealPhoto(item.body);
+          return;
+        }
+        break;
+
       default:
         throw new Error(`Unknown sync path: ${item.path}`);
     }
@@ -144,5 +155,87 @@ export class SyncService {
 
   async clearQueue(): Promise<void> {
     await localDb.syncQueue.clear();
+  }
+
+  // Meal-specific methods
+  async saveMealLocally(
+    photoPath: string,
+    takenAt?: string,
+    notes?: string
+  ): Promise<LocalMeal> {
+    const localMeal: LocalMeal = {
+      photoPath,
+      takenAt,
+      notes,
+      status: "draft",
+      createdAt: new Date().toISOString(),
+      syncAttempts: 0,
+    };
+
+    const id = await localDb.meals.add(localMeal);
+    return { ...localMeal, id };
+  }
+
+  async enqueueMealPhotoUpload(localMeal: LocalMeal): Promise<void> {
+    // Update meal status to pending sync
+    await localDb.meals.update(localMeal.id!, { status: "pending_sync" });
+
+    // Add to sync queue
+    await this.enqueueSync({
+      method: "POST",
+      path: "/meals/photo",
+      body: {
+        localMealId: localMeal.id,
+        photoPath: localMeal.photoPath,
+        takenAt: localMeal.takenAt,
+        notes: localMeal.notes,
+      },
+    });
+  }
+
+  private async syncMealPhoto(body: any): Promise<void> {
+    const { localMealId, photoPath, takenAt, notes } = body;
+
+    try {
+      // Convert photo path to blob
+      const blob = await this.mealApiService.convertWebPathToBlob(photoPath);
+
+      // Upload to server
+      const response = await this.mealApiService
+        .uploadMealPhoto(blob, takenAt, notes)
+        .toPromise();
+
+      if (response) {
+        // Update local meal with server data
+        await localDb.meals.update(localMealId, {
+          mealId: response.mealId,
+          status: "synced",
+        });
+      }
+    } catch (error) {
+      // Update sync attempts
+      const meal = await localDb.meals.get(localMealId);
+      if (meal) {
+        await localDb.meals.update(localMealId, {
+          syncAttempts: meal.syncAttempts + 1,
+          lastSyncAttempt: new Date().toISOString(),
+          errorMessage:
+            error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+      throw error;
+    }
+  }
+
+  async getMeals(limit: number = 20): Promise<LocalMeal[]> {
+    return await localDb.meals
+      .orderBy("createdAt")
+      .reverse()
+      .limit(limit)
+      .toArray();
+  }
+
+  async getPendingSyncMeals(): Promise<LocalMeal[]> {
+    return await localDb.meals.where("status").equals("pending_sync").toArray();
   }
 }

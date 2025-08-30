@@ -236,7 +236,8 @@ paths:
       tags:
         - nutrition
       summary: Upload meal photo
-      description: Upload a photo for meal recognition
+      description: Upload a photo to create a meal entry (draft status)
+      operationId: uploadMealPhoto
       requestBody:
         required: true
         content:
@@ -244,21 +245,85 @@ paths:
             schema:
               type: object
               properties:
-                photo:
+                image:
                   type: string
                   format: binary
-                  description: The meal photo to upload
+                  description: The meal photo to upload (max 8MB, jpg/png/heic)
+                takenAt:
+                  type: string
+                  format: date-time
+                  description: When the photo was taken (ISO datetime)
+                  example: '2025-08-30T12:30:00Z'
+                notes:
+                  type: string
+                  maxLength: 500
+                  description: Optional notes about the meal
+                  example: 'Lunch at the office'
               required:
-                - photo
+                - image
       responses:
-        '200':
-          description: Photo uploaded successfully
+        '201':
+          description: Meal created successfully with photo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PhotoUploadResponse'
+                $ref: '#/components/schemas/MealPhotoResponse'
         '400':
-          description: Invalid photo or format
+          description: Invalid file, missing image, or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Payload too large (file size exceeds 8MB)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /meals/{mealId}:
+    get:
+      tags:
+        - nutrition
+      summary: Get meal by ID
+      description: Retrieve a specific meal by its ID
+      operationId: getMealById
+      parameters:
+        - name: mealId
+          in: path
+          required: true
+          description: The ID of the meal to retrieve
+          schema:
+            type: string
+            format: uuid
+            example: '123e4567-e89b-12d3-a456-426614174000'
+      responses:
+        '200':
+          description: Meal retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meal'
+        '404':
+          description: Meal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
           content:
             application/json:
               schema:
@@ -958,25 +1023,34 @@ components:
         - meals
         - total
 
-    PhotoUploadResponse:
+    MealPhotoResponse:
       type: object
       properties:
-        photoId:
+        mealId:
           type: string
           format: uuid
           example: '123e4567-e89b-12d3-a456-426614174000'
+          description: The ID of the created meal
         photoUrl:
           type: string
           format: uri
-          example: https://example.com/photos/meal-123.jpg
+          example: 'https://cdn.example.com/meals/meal-uuid.jpg'
+          description: URL of the uploaded photo
         status:
           type: string
-          enum: [uploaded, processing]
-          example: uploaded
+          enum: [draft]
+          example: draft
+          description: Status of the meal (always draft for new uploads)
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T12:30:00Z'
+          description: When the meal was created
       required:
-        - photoId
+        - mealId
         - photoUrl
         - status
+        - createdAt
 
     MealRecognitionResponse:
       type: object

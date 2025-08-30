@@ -63,6 +63,22 @@ export const routes: Routes = [
     component: HomeComponent,
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "nutrition",
+    loadComponent: () =>
+      import("./nutrition/nutrition-list/nutrition-list.component").then(
+        (m) => m.NutritionListComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
+  {
+    path: "nutrition/add-meal",
+    loadComponent: () =>
+      import("./nutrition/add-meal/meal-photo.component").then(
+        (m) => m.MealPhotoComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {
