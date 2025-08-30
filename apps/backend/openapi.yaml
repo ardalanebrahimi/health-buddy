@@ -48,15 +48,41 @@ paths:
         - profile
       summary: Get user profile
       description: Retrieve the current user's profile information
+      operationId: getProfile
       responses:
         '200':
           description: User profile retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/Profile'
         '404':
           description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - profile
+      summary: Create user profile
+      description: Create or update the current user's profile information
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfileRequest'
+      responses:
+        '201':
+          description: Profile created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          description: Invalid input
           content:
             application/json:
               schema:
@@ -78,7 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/Profile'
         '400':
           description: Invalid input
           content:
@@ -497,47 +523,43 @@ components:
       required:
         - error
 
-    UserProfile:
+    Profile:
       type: object
       properties:
         id:
           type: string
           format: uuid
           example: '123e4567-e89b-12d3-a456-426614174000'
-        email:
+        userId:
           type: string
-          format: email
-          example: user@example.com
-        firstName:
+          example: 'user123'
+        age:
+          type: integer
+          minimum: 5
+          maximum: 120
+          example: 38
+        sex:
           type: string
-          example: John
-        lastName:
-          type: string
-          example: Doe
-        dateOfBirth:
-          type: string
-          format: date
-          example: '1990-01-15'
-        gender:
-          type: string
-          enum: [male, female, other, prefer_not_to_say]
-          example: male
+          enum: ['M', 'F', 'Other']
+          example: 'M'
         heightCm:
           type: number
-          minimum: 50
+          minimum: 120
+          maximum: 230
+          example: 180
+        weightKg:
+          type: number
+          minimum: 20
           maximum: 300
-          example: 175.5
+          example: 110
         activityLevel:
           type: string
-          enum:
-            [
-              sedentary,
-              lightly_active,
-              moderately_active,
-              very_active,
-              extremely_active,
-            ]
-          example: moderately_active
+          enum: ['sedentary', 'light', 'moderate', 'active']
+          example: 'moderate'
+        baselineJson:
+          type: object
+          nullable: true
+          description: 'Baseline health information for UP-002'
         createdAt:
           type: string
           format: date-time
@@ -548,6 +570,45 @@ components:
           example: '2025-08-30T10:00:00Z'
       required:
         - id
+        - userId
+        - age
+        - sex
+        - heightCm
+        - weightKg
+        - activityLevel
+
+    CreateProfileRequest:
+      type: object
+      properties:
+        age:
+          type: integer
+          minimum: 5
+          maximum: 120
+          example: 38
+        sex:
+          type: string
+          enum: ['M', 'F', 'Other']
+          example: 'M'
+        heightCm:
+          type: number
+          minimum: 120
+          maximum: 230
+          example: 180
+        weightKg:
+          type: number
+          minimum: 20
+          maximum: 300
+          example: 110
+        activityLevel:
+          type: string
+          enum: ['sedentary', 'light', 'moderate', 'active']
+          example: 'moderate'
+      required:
+        - age
+        - sex
+        - heightCm
+        - weightKg
+        - activityLevel
         - email
         - firstName
         - lastName

@@ -1,21 +1,62 @@
 import { Router } from 'express';
+import { ProfileService } from './profile.service';
+import { validateCreateProfile } from './profile.validation';
 
 const router = Router();
 
 // GET /profile - Get user profile
-router.get('/profile', (req, res) => {
-  res.json({
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'user@example.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    dateOfBirth: '1990-01-15',
-    gender: 'male',
-    heightCm: 175.5,
-    activityLevel: 'moderately_active',
-    createdAt: '2025-08-30T10:00:00Z',
-    updatedAt: '2025-08-30T10:00:00Z',
-  });
+router.get('/profile', async (req, res) => {
+  try {
+    const profile = await ProfileService.getProfile();
+
+    if (!profile) {
+      return res.status(404).json({
+        error: {
+          code: 'PROFILE_NOT_FOUND',
+          message: 'Profile not found',
+        },
+      });
+    }
+
+    res.json(profile);
+  } catch (error) {
+    console.error('Error getting profile:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to retrieve profile',
+      },
+    });
+  }
+});
+
+// POST /profile - Create user profile
+router.post('/profile', async (req, res) => {
+  try {
+    // Validate request body
+    const validationResult = validateCreateProfile(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input provided',
+          details: validationResult.errors,
+        },
+      });
+    }
+
+    const profile = await ProfileService.createOrUpdateProfile(req.body);
+    res.status(201).json(profile);
+  } catch (error) {
+    console.error('Error creating profile:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to create profile',
+      },
+    });
+  }
 });
 
 // PUT /profile - Update user profile

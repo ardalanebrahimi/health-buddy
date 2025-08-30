@@ -1,0 +1,145 @@
+<div class="demographics-container">
+  <div class="header">
+    <h1>Tell us about yourself</h1>
+    <p>This information helps us personalize your health journey</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="demographics-form">
+    <!-- Age Field -->
+    <div class="form-group">
+      <label for="age" class="form-label">Age</label>
+      <input
+        id="age"
+        type="number"
+        formControlName="age"
+        class="form-input"
+        [class.error]="getFieldError('age')"
+        min="5"
+        max="120"
+        placeholder="Enter your age"
+        aria-describedby="age-error"
+      />
+      @if (getFieldError('age')) {
+      <div id="age-error" class="error-message" role="alert">
+        {{ getFieldError("age") }}
+      </div>
+      }
+    </div>
+
+    <!-- Sex Field -->
+    <div class="form-group">
+      <fieldset>
+        <legend class="form-label">Sex</legend>
+        <div class="radio-group">
+          @for (option of sexOptions; track option.value) {
+          <label class="radio-option">
+            <input
+              type="radio"
+              [value]="option.value"
+              formControlName="sex"
+              [attr.aria-describedby]="
+                getFieldError('sex') ? 'sex-error' : null
+              "
+            />
+            <span class="radio-label">{{ option.label }}</span>
+          </label>
+          }
+        </div>
+        @if (getFieldError('sex')) {
+        <div id="sex-error" class="error-message" role="alert">
+          {{ getFieldError("sex") }}
+        </div>
+        }
+      </fieldset>
+    </div>
+
+    <!-- Height Field -->
+    <div class="form-group">
+      <label for="height" class="form-label">Height (cm)</label>
+      <input
+        id="height"
+        type="number"
+        formControlName="heightCm"
+        class="form-input"
+        [class.error]="getFieldError('heightCm')"
+        min="120"
+        max="230"
+        placeholder="Enter your height"
+        aria-describedby="height-error height-hint"
+      />
+      <div id="height-hint" class="field-hint">Between 120-230 cm</div>
+      @if (getFieldError('heightCm')) {
+      <div id="height-error" class="error-message" role="alert">
+        {{ getFieldError("heightCm") }}
+      </div>
+      }
+    </div>
+
+    <!-- Weight Field -->
+    <div class="form-group">
+      <label for="weight" class="form-label">Weight (kg)</label>
+      <input
+        id="weight"
+        type="number"
+        formControlName="weightKg"
+        class="form-input"
+        [class.error]="getFieldError('weightKg')"
+        min="20"
+        max="300"
+        step="0.1"
+        placeholder="Enter your weight"
+        aria-describedby="weight-error weight-hint"
+      />
+      <div id="weight-hint" class="field-hint">Between 20-300 kg</div>
+      @if (getFieldError('weightKg')) {
+      <div id="weight-error" class="error-message" role="alert">
+        {{ getFieldError("weightKg") }}
+      </div>
+      }
+    </div>
+
+    <!-- Activity Level Field -->
+    <div class="form-group">
+      <fieldset>
+        <legend class="form-label">Activity Level</legend>
+        <div class="activity-options">
+          @for (level of activityLevels; track level.value) {
+          <label class="activity-option">
+            <input
+              type="radio"
+              [value]="level.value"
+              formControlName="activityLevel"
+              [attr.aria-describedby]="
+                getFieldError('activityLevel') ? 'activity-error' : null
+              "
+            />
+            <div class="activity-content">
+              <span class="activity-label">{{ level.label }}</span>
+              <span class="activity-description">{{ level.description }}</span>
+            </div>
+          </label>
+          }
+        </div>
+        @if (getFieldError('activityLevel')) {
+        <div id="activity-error" class="error-message" role="alert">
+          {{ getFieldError("activityLevel") }}
+        </div>
+        }
+      </fieldset>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="form.invalid || isLoading"
+        [attr.aria-busy]="isLoading"
+      >
+        @if (isLoading) {
+        <span class="loading-spinner" aria-hidden="true"></span>
+        Saving... } @else { Continue }
+      </button>
+    </div>
+  </form>
+</div>

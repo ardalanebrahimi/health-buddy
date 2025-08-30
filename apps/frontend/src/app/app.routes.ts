@@ -1,6 +1,10 @@
 import { Routes } from "@angular/router";
 import { HomeComponent } from "./home/home.component";
 import { lockGuard } from "./auth-lock/guards/lock.guard";
+import {
+  onboardingGuard,
+  profileCompleteGuard,
+} from "./onboarding/onboarding.guard";
 
 export const routes: Routes = [
   // Auth routes (no guard needed)
@@ -27,11 +31,29 @@ export const routes: Routes = [
     canMatch: [lockGuard],
   },
 
-  // Protected routes (require unlock)
+  // Onboarding routes (require unlock but not complete profile)
+  {
+    path: "onboarding/demographics",
+    loadComponent: () =>
+      import("./onboarding/demographics/demographics.component").then(
+        (m) => m.DemographicsComponent
+      ),
+    canMatch: [lockGuard, onboardingGuard],
+  },
+  {
+    path: "onboarding/baseline",
+    loadComponent: () =>
+      import("./onboarding/baseline/baseline.component").then(
+        (m) => m.BaselineComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
+
+  // Protected routes (require unlock and complete profile)
   {
     path: "",
     component: HomeComponent,
-    canMatch: [lockGuard],
+    canMatch: [lockGuard, profileCompleteGuard],
   },
 
   // Redirect unknown routes to home

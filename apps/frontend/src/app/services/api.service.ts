@@ -38,6 +38,15 @@ export class ApiService {
     }
   }
 
+  async createProfile(data: any) {
+    try {
+      return await this.client.createProfile(data);
+    } catch (error) {
+      console.error("Failed to create profile:", error);
+      throw error;
+    }
+  }
+
   async getNutritionSummary(date?: string, period?: "daily" | "weekly") {
     try {
       return await this.client.getNutritionSummary({ date, period });
