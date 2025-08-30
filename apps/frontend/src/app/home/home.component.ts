@@ -1,11 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { CommonModule } from "@angular/common";
-import { environment } from "../../environments/environment";
-
-interface HealthCheckResponse {
-  status: string;
-}
+import { ApiService } from "../services/api.service";
 
 @Component({
   selector: "app-home",
@@ -17,35 +12,50 @@ interface HealthCheckResponse {
 export class HomeComponent implements OnInit {
   apiStatus: "loading" | "ok" | "error" = "loading";
   apiStatusMessage = "Checking...";
+  dailySummary: any = null;
+  companionMessage: any = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     this.checkApiHealth();
+    this.loadDailySummary();
+    this.loadCompanionMessage();
   }
 
-  checkApiHealth() {
+  async checkApiHealth() {
     this.apiStatus = "loading";
     this.apiStatusMessage = "Checking...";
 
-    // Try to call the backend health endpoint
-    const healthUrl = `${environment.apiBaseUrl.replace("/api/v1", "")}/health`;
-
-    this.http.get<HealthCheckResponse>(healthUrl).subscribe({
-      next: (response) => {
-        if (response.status === "ok") {
-          this.apiStatus = "ok";
-          this.apiStatusMessage = "API is healthy ✅";
-        } else {
-          this.apiStatus = "error";
-          this.apiStatusMessage = `Unexpected response: ${response.status}`;
-        }
-      },
-      error: (error) => {
-        console.error("Health check failed:", error);
+    try {
+      const response = await this.apiService.getHealth();
+      if (response.status === "ok") {
+        this.apiStatus = "ok";
+        this.apiStatusMessage = "API is healthy";
+      } else {
         this.apiStatus = "error";
-        this.apiStatusMessage = `Failed to connect to API at ${healthUrl}`;
-      },
-    });
+        this.apiStatusMessage = "API returned unexpected status";
+      }
+    } catch (error) {
+      this.apiStatus = "error";
+      this.apiStatusMessage = "Failed to connect to API";
+      console.error("Health check error:", error);
+    }
+  }
+
+  async loadDailySummary() {
+    try {
+      this.dailySummary = await this.apiService.getDailySummary();
+    } catch (error) {
+      console.error("Failed to load daily summary:", error);
+    }
+  }
+
+  async loadCompanionMessage() {
+    try {
+      this.companionMessage = await this.apiService.getCompanionMessage();
+    } catch (error) {
+      console.error("Failed to load companion message:", error);
+    }
   }
 }

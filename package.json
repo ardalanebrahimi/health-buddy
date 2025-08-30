@@ -10,7 +10,10 @@
     "dev:web": "npm --prefix apps/frontend run start",
     "build:api": "npm --prefix apps/backend run build",
     "build:web": "npm --prefix apps/frontend run build",
-    "gen:sdk": "npm --prefix apps/backend run gen:sdk",
+    "build:sdk": "npm --prefix packages/sdk run build",
+    "gen:sdk": "npm --prefix apps/backend run gen:sdk && npm run build:sdk",
+    "validate:openapi": "npx swagger-jsdoc -d apps/backend/openapi.yaml && echo \"OpenAPI spec is valid\"",
+    "ci:check": "npm run validate:openapi && npm run gen:sdk && npm run build:api",
     "install:all": "npm install && npm --prefix apps/backend install && npm --prefix apps/frontend install && npm --prefix packages/sdk install && npm --prefix packages/domain-models install"
   },
   "devDependencies": {

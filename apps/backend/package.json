@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "lint": "echo \"(eslint to be added)\"",
-    "gen:sdk": "openapi -i openapi.yaml -o ../../packages/sdk --client axios --useOptions"
+    "gen:sdk": "echo \"SDK generation - using openapi-typescript\" && npx openapi-typescript openapi.yaml -o ../../packages/sdk/src/types.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

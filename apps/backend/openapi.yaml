@@ -2,13 +2,36 @@ openapi: 3.1.0
 info:
   title: Health Companion API
   version: 0.1.0
-  description: API for the Health Companion application
+  description: API for the Health Companion application - V1 MVP
+  contact:
+    name: Health Companion Team
 servers:
   - url: http://localhost:3000/api/v1
     description: Development server
+
+tags:
+  - name: health
+    description: Health check endpoints
+  - name: profile
+    description: User profile management
+  - name: goals
+    description: User goals and targets
+  - name: nutrition
+    description: Nutrition tracking and meal management
+  - name: hydration
+    description: Hydration tracking
+  - name: biometrics
+    description: Biometric measurements
+  - name: dashboard
+    description: Dashboard and summary views
+  - name: companion
+    description: AI companion interactions
+
 paths:
   /health:
     get:
+      tags:
+        - health
       summary: Health check
       description: Returns the health status of the API
       responses:
@@ -17,10 +40,1233 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
-                required:
-                  - status
+                $ref: '#/components/schemas/HealthResponse'
+
+  /profile:
+    get:
+      tags:
+        - profile
+      summary: Get user profile
+      description: Retrieve the current user's profile information
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - profile
+      summary: Update user profile
+      description: Update the current user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /goals:
+    get:
+      tags:
+        - goals
+      summary: Get user goals
+      description: Retrieve the current user's health goals
+      responses:
+        '200':
+          description: Goals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalsResponse'
+    put:
+      tags:
+        - goals
+      summary: Update user goals
+      description: Update the current user's health goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGoalsRequest'
+      responses:
+        '200':
+          description: Goals updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalsResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /meals:
+    get:
+      tags:
+        - nutrition
+      summary: Get meals
+      description: Retrieve meals for a specific date range
+      parameters:
+        - name: date
+          in: query
+          description: Date to filter meals (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+        - name: limit
+          in: query
+          description: Maximum number of meals to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Meals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealsResponse'
+    post:
+      tags:
+        - nutrition
+      summary: Create meal
+      description: Create a new meal entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMealRequest'
+      responses:
+        '201':
+          description: Meal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meal'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /meals/photo:
+    post:
+      tags:
+        - nutrition
+      summary: Upload meal photo
+      description: Upload a photo for meal recognition
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: The meal photo to upload
+              required:
+                - photo
+      responses:
+        '200':
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoUploadResponse'
+        '400':
+          description: Invalid photo or format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /meals/{mealId}/recognize:
+    post:
+      tags:
+        - nutrition
+      summary: Recognize meal from photo
+      description: Analyze a meal photo to identify food items and nutritional content
+      parameters:
+        - name: mealId
+          in: path
+          required: true
+          description: The ID of the meal to analyze
+          schema:
+            type: string
+            format: uuid
+            example: '123e4567-e89b-12d3-a456-426614174000'
+      responses:
+        '200':
+          description: Meal recognition completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealRecognitionResponse'
+        '404':
+          description: Meal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Photo cannot be processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /nutrition/summary:
+    get:
+      tags:
+        - nutrition
+      summary: Get nutrition summary
+      description: Get daily or weekly nutrition summary
+      parameters:
+        - name: date
+          in: query
+          description: Date for the summary (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+        - name: period
+          in: query
+          description: Summary period
+          schema:
+            type: string
+            enum: [daily, weekly]
+            default: daily
+      responses:
+        '200':
+          description: Nutrition summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionSummary'
+
+  /hydration:
+    get:
+      tags:
+        - hydration
+      summary: Get hydration entries
+      description: Retrieve hydration entries for a specific date
+      parameters:
+        - name: date
+          in: query
+          description: Date to filter hydration entries (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Hydration entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationResponse'
+    post:
+      tags:
+        - hydration
+      summary: Log hydration
+      description: Log a new hydration entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHydrationRequest'
+      responses:
+        '201':
+          description: Hydration logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationEntry'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/weight:
+    get:
+      tags:
+        - biometrics
+      summary: Get weight entries
+      description: Retrieve weight measurements for a date range
+      parameters:
+        - name: startDate
+          in: query
+          description: Start date for weight entries (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-01'
+        - name: endDate
+          in: query
+          description: End date for weight entries (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Weight entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntriesResponse'
+    post:
+      tags:
+        - biometrics
+      summary: Log weight
+      description: Log a new weight measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWeightRequest'
+      responses:
+        '201':
+          description: Weight logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/weight/latest:
+    get:
+      tags:
+        - biometrics
+      summary: Get latest weight
+      description: Retrieve the most recent weight measurement
+      responses:
+        '200':
+          description: Latest weight retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightEntry'
+        '404':
+          description: No weight entries found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /daily-summary:
+    get:
+      tags:
+        - dashboard
+      summary: Get daily summary
+      description: Get a comprehensive summary for a specific day
+      parameters:
+        - name: date
+          in: query
+          description: Date for the summary (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Daily summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailySummary'
+
+  /companion/daily:
+    get:
+      tags:
+        - companion
+      summary: Get daily companion message
+      description: Get the AI companion's daily summary and insights
+      parameters:
+        - name: date
+          in: query
+          description: Date for the daily message (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Daily companion message retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanionMessage'
+
+  /companion/history:
+    get:
+      tags:
+        - companion
+      summary: Get companion message history
+      description: Retrieve historical companion messages
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of messages to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of messages to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Companion message history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanionHistoryResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Invalid input provided
+          required:
+            - code
+            - message
+      required:
+        - error
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1990-01-15'
+        gender:
+          type: string
+          enum: [male, female, other, prefer_not_to_say]
+          example: male
+        heightCm:
+          type: number
+          minimum: 50
+          maximum: 300
+          example: 175.5
+        activityLevel:
+          type: string
+          enum:
+            [
+              sedentary,
+              lightly_active,
+              moderately_active,
+              very_active,
+              extremely_active,
+            ]
+          example: moderately_active
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T10:00:00Z'
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - createdAt
+        - updatedAt
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1990-01-15'
+        gender:
+          type: string
+          enum: [male, female, other, prefer_not_to_say]
+          example: male
+        heightCm:
+          type: number
+          minimum: 50
+          maximum: 300
+          example: 175.5
+        activityLevel:
+          type: string
+          enum:
+            [
+              sedentary,
+              lightly_active,
+              moderately_active,
+              very_active,
+              extremely_active,
+            ]
+          example: moderately_active
+
+    GoalsResponse:
+      type: object
+      properties:
+        dailyCalories:
+          type: number
+          minimum: 800
+          maximum: 5000
+          example: 2000
+        dailyProteinGrams:
+          type: number
+          minimum: 0
+          maximum: 500
+          example: 150
+        dailyCarbsGrams:
+          type: number
+          minimum: 0
+          maximum: 1000
+          example: 200
+        dailyFatGrams:
+          type: number
+          minimum: 0
+          maximum: 300
+          example: 65
+        dailyWaterLiters:
+          type: number
+          minimum: 0
+          maximum: 10
+          example: 2.5
+        targetWeightKg:
+          type: number
+          minimum: 30
+          maximum: 300
+          example: 70
+        weightGoalType:
+          type: string
+          enum: [lose, maintain, gain]
+          example: lose
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T10:00:00Z'
+      required:
+        - dailyCalories
+        - dailyWaterLiters
+        - updatedAt
+
+    UpdateGoalsRequest:
+      type: object
+      properties:
+        dailyCalories:
+          type: number
+          minimum: 800
+          maximum: 5000
+          example: 2000
+        dailyProteinGrams:
+          type: number
+          minimum: 0
+          maximum: 500
+          example: 150
+        dailyCarbsGrams:
+          type: number
+          minimum: 0
+          maximum: 1000
+          example: 200
+        dailyFatGrams:
+          type: number
+          minimum: 0
+          maximum: 300
+          example: 65
+        dailyWaterLiters:
+          type: number
+          minimum: 0
+          maximum: 10
+          example: 2.5
+        targetWeightKg:
+          type: number
+          minimum: 30
+          maximum: 300
+          example: 70
+        weightGoalType:
+          type: string
+          enum: [lose, maintain, gain]
+          example: lose
+
+    Meal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        name:
+          type: string
+          example: Grilled Chicken Salad
+        type:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+          example: lunch
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T12:30:00Z'
+        status:
+          type: string
+          enum: [draft, recognized, final]
+          example: final
+        totalCalories:
+          type: number
+          minimum: 0
+          example: 450
+        totalProteinGrams:
+          type: number
+          minimum: 0
+          example: 35
+        totalCarbsGrams:
+          type: number
+          minimum: 0
+          example: 15
+        totalFatGrams:
+          type: number
+          minimum: 0
+          example: 20
+        photoUrl:
+          type: string
+          format: uri
+          example: https://example.com/photos/meal-123.jpg
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodItem'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T12:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T12:30:00Z'
+      required:
+        - id
+        - name
+        - type
+        - takenAt
+        - status
+        - totalCalories
+        - createdAt
+        - updatedAt
+
+    FoodItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        name:
+          type: string
+          example: Grilled Chicken Breast
+        quantity:
+          type: number
+          minimum: 0
+          example: 150
+        unit:
+          type: string
+          example: grams
+        calories:
+          type: number
+          minimum: 0
+          example: 165
+        proteinGrams:
+          type: number
+          minimum: 0
+          example: 31
+        carbsGrams:
+          type: number
+          minimum: 0
+          example: 0
+        fatGrams:
+          type: number
+          minimum: 0
+          example: 3.6
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.95
+          description: AI confidence score for recognized items
+      required:
+        - id
+        - name
+        - quantity
+        - unit
+        - calories
+
+    CreateMealRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Grilled Chicken Salad
+        type:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+          example: lunch
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T12:30:00Z'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateFoodItemRequest'
+      required:
+        - name
+        - type
+        - takenAt
+
+    CreateFoodItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Grilled Chicken Breast
+        quantity:
+          type: number
+          minimum: 0
+          example: 150
+        unit:
+          type: string
+          example: grams
+        calories:
+          type: number
+          minimum: 0
+          example: 165
+        proteinGrams:
+          type: number
+          minimum: 0
+          example: 31
+        carbsGrams:
+          type: number
+          minimum: 0
+          example: 0
+        fatGrams:
+          type: number
+          minimum: 0
+          example: 3.6
+      required:
+        - name
+        - quantity
+        - unit
+        - calories
+
+    MealsResponse:
+      type: object
+      properties:
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meal'
+        total:
+          type: integer
+          minimum: 0
+          example: 5
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - meals
+        - total
+
+    PhotoUploadResponse:
+      type: object
+      properties:
+        photoId:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        photoUrl:
+          type: string
+          format: uri
+          example: https://example.com/photos/meal-123.jpg
+        status:
+          type: string
+          enum: [uploaded, processing]
+          example: uploaded
+      required:
+        - photoId
+        - photoUrl
+        - status
+
+    MealRecognitionResponse:
+      type: object
+      properties:
+        mealId:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        recognizedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodItem'
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.85
+          description: Overall recognition confidence
+        status:
+          type: string
+          enum: [completed, failed, processing]
+          example: completed
+        totalCalories:
+          type: number
+          minimum: 0
+          example: 450
+      required:
+        - mealId
+        - recognizedItems
+        - confidence
+        - status
+
+    NutritionSummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2025-08-30'
+        period:
+          type: string
+          enum: [daily, weekly]
+          example: daily
+        totalCalories:
+          type: number
+          minimum: 0
+          example: 1850
+        totalProteinGrams:
+          type: number
+          minimum: 0
+          example: 120
+        totalCarbsGrams:
+          type: number
+          minimum: 0
+          example: 180
+        totalFatGrams:
+          type: number
+          minimum: 0
+          example: 65
+        goalCalories:
+          type: number
+          minimum: 0
+          example: 2000
+        goalProteinGrams:
+          type: number
+          minimum: 0
+          example: 150
+        goalCarbsGrams:
+          type: number
+          minimum: 0
+          example: 200
+        goalFatGrams:
+          type: number
+          minimum: 0
+          example: 65
+        mealBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealSummary'
+      required:
+        - date
+        - period
+        - totalCalories
+        - goalCalories
+
+    MealSummary:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+          example: lunch
+        calories:
+          type: number
+          minimum: 0
+          example: 450
+        mealCount:
+          type: integer
+          minimum: 0
+          example: 1
+      required:
+        - type
+        - calories
+        - mealCount
+
+    HydrationEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        amountMl:
+          type: number
+          minimum: 0
+          maximum: 3000
+          example: 250
+        type:
+          type: string
+          enum: [water, tea, coffee, juice, other]
+          example: water
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T14:30:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T14:30:00Z'
+      required:
+        - id
+        - amountMl
+        - type
+        - takenAt
+        - createdAt
+
+    CreateHydrationRequest:
+      type: object
+      properties:
+        amountMl:
+          type: number
+          minimum: 0
+          maximum: 3000
+          example: 250
+        type:
+          type: string
+          enum: [water, tea, coffee, juice, other]
+          example: water
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T14:30:00Z'
+      required:
+        - amountMl
+        - type
+        - takenAt
+
+    HydrationResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/HydrationEntry'
+        totalMl:
+          type: number
+          minimum: 0
+          example: 1500
+        goalMl:
+          type: number
+          minimum: 0
+          example: 2500
+        date:
+          type: string
+          format: date
+          example: '2025-08-30'
+      required:
+        - entries
+        - totalMl
+        - goalMl
+        - date
+
+    WeightEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        weightKg:
+          type: number
+          minimum: 20
+          maximum: 500
+          example: 72.5
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+        notes:
+          type: string
+          maxLength: 500
+          example: Morning weight after workout
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - id
+        - weightKg
+        - takenAt
+        - createdAt
+
+    CreateWeightRequest:
+      type: object
+      properties:
+        weightKg:
+          type: number
+          minimum: 20
+          maximum: 500
+          example: 72.5
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+        notes:
+          type: string
+          maxLength: 500
+          example: Morning weight after workout
+      required:
+        - weightKg
+        - takenAt
+
+    WeightEntriesResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeightEntry'
+        total:
+          type: integer
+          minimum: 0
+          example: 10
+        startDate:
+          type: string
+          format: date
+          example: '2025-08-01'
+        endDate:
+          type: string
+          format: date
+          example: '2025-08-30'
+      required:
+        - entries
+        - total
+
+    DailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2025-08-30'
+        nutrition:
+          $ref: '#/components/schemas/NutritionSummary'
+        hydration:
+          type: object
+          properties:
+            totalMl:
+              type: number
+              minimum: 0
+              example: 1500
+            goalMl:
+              type: number
+              minimum: 0
+              example: 2500
+            percentage:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 60
+          required:
+            - totalMl
+            - goalMl
+            - percentage
+        weight:
+          allOf:
+            - $ref: '#/components/schemas/WeightEntry'
+            - type: object
+              properties:
+                trend:
+                  type: string
+                  enum: [increasing, decreasing, stable]
+                  example: decreasing
+        completionScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 85
+          description: Overall completion score for the day
+      required:
+        - date
+        - completionScore
+
+    CompanionMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        type:
+          type: string
+          enum: [daily_summary, encouragement, reminder, insight]
+          example: daily_summary
+        message:
+          type: string
+          example: Great job staying on track with your nutrition goals today! You consumed 1,850 calories and hit 80% of your protein target.
+        tone:
+          type: string
+          enum: [encouraging, neutral, motivational, caring]
+          example: encouraging
+        date:
+          type: string
+          format: date
+          example: '2025-08-30'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T20:00:00Z'
+        metadata:
+          type: object
+          properties:
+            nutritionScore:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 85
+            hydrationScore:
+              type: number
+              minimum: 0
+              maximum: 100
+              example: 60
+            keyInsights:
+              type: array
+              items:
+                type: string
+              example: ['High protein intake', 'Need more hydration']
+      required:
+        - id
+        - type
+        - message
+        - tone
+        - date
+        - createdAt
+
+    CompanionHistoryResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanionMessage'
+        total:
+          type: integer
+          minimum: 0
+          example: 15
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - messages
+        - total
+
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          example: 20
+        offset:
+          type: integer
+          minimum: 0
+          example: 0
+        hasNext:
+          type: boolean
+          example: true
+        hasPrevious:
+          type: boolean
+          example: false
+      required:
+        - limit
+        - offset
+        - hasNext
+        - hasPrevious

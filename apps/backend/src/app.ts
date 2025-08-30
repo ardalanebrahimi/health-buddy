@@ -21,6 +21,7 @@ import insightsRouter from './modules/insights';
 import recommendationsRouter from './modules/recommendations';
 import integrationsRouter from './modules/integrations';
 import aiRouter from './modules/ai';
+import hydrationRouter from './modules/hydration';
 
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -39,11 +40,6 @@ export function createApp() {
   // Body parsing middleware
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
-
-  // Health check endpoint
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
-  });
 
   // Serve OpenAPI spec
   app.get('/api/openapi.yaml', (req, res) => {
@@ -66,13 +62,19 @@ export function createApp() {
   // API v1 routes
   const v1Router = express.Router();
 
+  // Health check endpoint (under /api/v1)
+  v1Router.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
   // Mount module routers
   v1Router.use('/auth', authRouter);
-  v1Router.use('/users', usersRouter);
-  v1Router.use('/nutrition', nutritionRouter);
-  v1Router.use('/biometrics', biometricsRouter);
-  v1Router.use('/companion', companionRouter);
-  v1Router.use('/dashboard', dashboardRouter);
+  v1Router.use('/', usersRouter); // Profile and goals endpoints
+  v1Router.use('/', nutritionRouter); // Nutrition endpoints
+  v1Router.use('/', biometricsRouter); // Biometrics endpoints
+  v1Router.use('/companion', companionRouter); // Companion endpoints
+  v1Router.use('/', dashboardRouter); // Dashboard endpoints
+  v1Router.use('/hydration', hydrationRouter);
   v1Router.use('/plans', plansRouter);
   v1Router.use('/adherence', adherenceRouter);
   v1Router.use('/insights', insightsRouter);

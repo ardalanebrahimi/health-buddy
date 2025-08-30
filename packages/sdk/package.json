@@ -5,16 +5,20 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "echo \"SDK will be generated from OpenAPI spec\"",
-    "clean": "rimraf dist src"
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
     "axios": "^1.5.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.0"
+    "rimraf": "^5.0.0",
+    "typescript": "^5.2.2"
   }
 }

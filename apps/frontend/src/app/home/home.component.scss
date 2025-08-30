@@ -1,7 +1,7 @@
 .home-container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
-  text-align: center;
+  padding: 20px;
 }
 
 .status-section {
@@ -47,6 +47,90 @@ button {
 button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+}
+
+.sdk-demo-section {
+  margin-top: 30px;
+  text-align: left;
+
+  h3 {
+    color: #555;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+  }
+}
+
+.summary-card,
+.companion-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+}
+
+.summary-stats {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+
+    label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    span {
+      color: #333;
+    }
+  }
+}
+
+.companion-card {
+  p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  .metadata {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+
+    small {
+      color: #666;
+    }
+
+    .insights {
+      margin-top: 10px;
+
+      ul {
+        margin: 5px 0 0 20px;
+        padding: 0;
+
+        li {
+          margin: 5px 0;
+          color: #555;
+        }
+      }
+    }
+  }
 }
 
 button:hover:not(:disabled) {

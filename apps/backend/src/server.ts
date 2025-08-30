@@ -9,5 +9,7 @@ app.listen(PORT, () => {
   console.log(
     `📖 OpenAPI spec available at http://localhost:${PORT}/api/openapi.yaml`
   );
-  console.log(`❤️  Health check available at http://localhost:${PORT}/health`);
+  console.log(
+    `❤️  Health check available at http://localhost:${PORT}/api/v1/health`
+  );
 });

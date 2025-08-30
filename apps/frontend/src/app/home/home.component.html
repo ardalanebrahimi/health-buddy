@@ -1,5 +1,6 @@
 <div class="home-container">
   <h2>Welcome to Health Companion</h2>
+
   <div class="status-section">
     <h3>API Status Check</h3>
     <div
@@ -15,5 +16,65 @@
     <button (click)="checkApiHealth()" [disabled]="apiStatus === 'loading'">
       {{ apiStatus === "loading" ? "Checking..." : "Check API Health" }}
     </button>
+  </div>
+
+  <div class="sdk-demo-section" *ngIf="apiStatus === 'ok'">
+    <h3>SDK Demo - Daily Summary</h3>
+    <div *ngIf="dailySummary" class="summary-card">
+      <h4>Daily Summary for {{ dailySummary.date }}</h4>
+      <div class="summary-stats">
+        <div class="stat">
+          <label>Completion Score:</label>
+          <span>{{ dailySummary.completionScore }}%</span>
+        </div>
+        <div class="stat" *ngIf="dailySummary.nutrition">
+          <label>Calories:</label>
+          <span
+            >{{ dailySummary.nutrition.totalCalories }} /
+            {{ dailySummary.nutrition.goalCalories }}</span
+          >
+        </div>
+        <div class="stat" *ngIf="dailySummary.hydration">
+          <label>Hydration:</label>
+          <span
+            >{{ dailySummary.hydration.totalMl }}ml /
+            {{ dailySummary.hydration.goalMl }}ml ({{
+              dailySummary.hydration.percentage
+            }}%)</span
+          >
+        </div>
+        <div class="stat" *ngIf="dailySummary.weight">
+          <label>Weight:</label>
+          <span
+            >{{ dailySummary.weight.weightKg }}kg ({{
+              dailySummary.weight.trend
+            }})</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <h3>SDK Demo - AI Companion Message</h3>
+    <div *ngIf="companionMessage" class="companion-card">
+      <h4>
+        {{ companionMessage.type | titlecase }} -
+        {{ companionMessage.tone | titlecase }}
+      </h4>
+      <p>{{ companionMessage.message }}</p>
+      <div class="metadata" *ngIf="companionMessage.metadata">
+        <small>
+          Nutrition Score: {{ companionMessage.metadata.nutritionScore }}% |
+          Hydration Score: {{ companionMessage.metadata.hydrationScore }}%
+        </small>
+        <div class="insights" *ngIf="companionMessage.metadata.keyInsights">
+          <strong>Key Insights:</strong>
+          <ul>
+            <li *ngFor="let insight of companionMessage.metadata.keyInsights">
+              {{ insight }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
