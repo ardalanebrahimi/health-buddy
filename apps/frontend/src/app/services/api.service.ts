@@ -73,4 +73,22 @@ export class ApiService {
       throw error;
     }
   }
+
+  async getGoals() {
+    try {
+      return await this.client.getGoals();
+    } catch (error) {
+      console.error("Failed to get goals:", error);
+      throw error;
+    }
+  }
+
+  async updateGoals(data: any) {
+    try {
+      return await this.client.updateGoals(data);
+    } catch (error) {
+      console.error("Failed to update goals:", error);
+      throw error;
+    }
+  }
 }

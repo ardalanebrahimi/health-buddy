@@ -29,6 +29,19 @@ export interface UpdateBaselineDto {
   notes?: string | null;
 }
 
+export interface GoalsDto {
+  weightGoalKg: number;
+  sleepHoursTarget: number;
+  painTarget?: number;
+  updatedAt: string;
+}
+
+export interface UpdateGoalsDto {
+  weightGoalKg: number;
+  sleepHoursTarget: number;
+  painTarget?: number;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -192,5 +205,72 @@ export class ProfileService {
     // For now, just clear the queue
     this.syncQueue = [];
     localStorage.removeItem("health-buddy-sync-queue");
+  }
+
+  /**
+   * Get user goals
+   */
+  async getGoals(): Promise<GoalsDto | null> {
+    try {
+      const response = await this.apiService.getGoals();
+      return response as GoalsDto;
+    } catch (error) {
+      console.warn(
+        "Failed to fetch goals from API, checking local mirror:",
+        error
+      );
+
+      // Check local storage for cached goals
+      const cachedGoals = localStorage.getItem("health-buddy-goals");
+      if (cachedGoals) {
+        return JSON.parse(cachedGoals);
+      }
+
+      return null;
+    }
+  }
+
+  /**
+   * Save user goals (with offline support)
+   */
+  async saveGoals(dto: UpdateGoalsDto): Promise<GoalsDto> {
+    try {
+      const response = await this.apiService.updateGoals(dto);
+      const goals = response as GoalsDto;
+
+      // Cache locally
+      localStorage.setItem("health-buddy-goals", JSON.stringify(goals));
+
+      return goals;
+    } catch (error) {
+      console.warn("Failed to save goals to API, queuing for sync:", error);
+
+      // Create optimistic update
+      const optimisticGoals: GoalsDto = {
+        ...dto,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Cache locally
+      localStorage.setItem(
+        "health-buddy-goals",
+        JSON.stringify(optimisticGoals)
+      );
+
+      // Queue for sync when online
+      this.syncQueue.push({
+        id: this.generateUuid(),
+        method: "PUT",
+        endpoint: "/goals",
+        data: dto,
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem(
+        "health-buddy-sync-queue",
+        JSON.stringify(this.syncQueue)
+      );
+
+      return optimisticGoals;
+    }
   }
 }

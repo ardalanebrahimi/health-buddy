@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { ProfileService } from './profile.service';
+import { GoalsService } from './goals.service';
 import {
   validateCreateProfile,
   validateUpdateBaseline,
 } from './profile.validation';
+import { validateUpdateGoals } from './goals.validation';
 
 const router = Router();
 
@@ -108,28 +110,58 @@ router.patch('/profile/baseline', async (req, res) => {
 });
 
 // GET /goals - Get user goals
-router.get('/goals', (req, res) => {
-  res.json({
-    dailyCalories: 2000,
-    dailyProteinGrams: 150,
-    dailyCarbsGrams: 200,
-    dailyFatGrams: 65,
-    dailyWaterLiters: 2.5,
-    targetWeightKg: 70,
-    weightGoalType: 'lose',
-    updatedAt: '2025-08-30T10:00:00Z',
-  });
+router.get('/goals', async (req, res) => {
+  try {
+    const goals = await GoalsService.getGoals();
+
+    if (!goals) {
+      return res.status(404).json({
+        error: {
+          code: 'GOALS_NOT_FOUND',
+          message: 'Goals not found',
+        },
+      });
+    }
+
+    res.json(goals);
+  } catch (error) {
+    console.error('Error getting goals:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to retrieve goals',
+      },
+    });
+  }
 });
 
 // PUT /goals - Update user goals
-router.put('/goals', (req, res) => {
-  // In a real implementation, validate and update the goals
-  const updatedGoals = {
-    ...req.body,
-    updatedAt: new Date().toISOString(),
-  };
+router.put('/goals', async (req, res) => {
+  try {
+    // Validate request body
+    const validationResult = validateUpdateGoals(req.body);
 
-  res.json(updatedGoals);
+    if (!validationResult.isValid) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input provided',
+          details: validationResult.errors,
+        },
+      });
+    }
+
+    const updatedGoals = await GoalsService.updateGoals(req.body);
+    res.json(updatedGoals);
+  } catch (error) {
+    console.error('Error updating goals:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to update goals',
+      },
+    });
+  }
 });
 
 export default router;

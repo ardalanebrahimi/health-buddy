@@ -721,86 +721,57 @@ components:
     GoalsResponse:
       type: object
       properties:
-        dailyCalories:
+        weightGoalKg:
           type: number
-          minimum: 800
-          maximum: 5000
-          example: 2000
-        dailyProteinGrams:
-          type: number
-          minimum: 0
-          maximum: 500
-          example: 150
-        dailyCarbsGrams:
-          type: number
-          minimum: 0
-          maximum: 1000
-          example: 200
-        dailyFatGrams:
-          type: number
-          minimum: 0
+          minimum: 20
           maximum: 300
-          example: 65
-        dailyWaterLiters:
-          type: number
+          example: 75
+          description: Target weight in kilograms
+        sleepHoursTarget:
+          type: integer
+          minimum: 4
+          maximum: 12
+          example: 7
+          description: Target sleep hours per night
+        painTarget:
+          type: integer
           minimum: 0
           maximum: 10
-          example: 2.5
-        targetWeightKg:
-          type: number
-          minimum: 30
-          maximum: 300
-          example: 70
-        weightGoalType:
-          type: string
-          enum: [lose, maintain, gain]
-          example: lose
+          example: 3
+          description: Target pain level (0-10 scale), optional
         updatedAt:
           type: string
           format: date-time
           example: '2025-08-30T10:00:00Z'
       required:
-        - dailyCalories
-        - dailyWaterLiters
+        - weightGoalKg
+        - sleepHoursTarget
         - updatedAt
 
     UpdateGoalsRequest:
       type: object
       properties:
-        dailyCalories:
+        weightGoalKg:
           type: number
-          minimum: 800
-          maximum: 5000
-          example: 2000
-        dailyProteinGrams:
-          type: number
-          minimum: 0
-          maximum: 500
-          example: 150
-        dailyCarbsGrams:
-          type: number
-          minimum: 0
-          maximum: 1000
-          example: 200
-        dailyFatGrams:
-          type: number
-          minimum: 0
+          minimum: 20
           maximum: 300
-          example: 65
-        dailyWaterLiters:
-          type: number
+          example: 75
+          description: Target weight in kilograms
+        sleepHoursTarget:
+          type: integer
+          minimum: 4
+          maximum: 12
+          example: 7
+          description: Target sleep hours per night
+        painTarget:
+          type: integer
           minimum: 0
           maximum: 10
-          example: 2.5
-        targetWeightKg:
-          type: number
-          minimum: 30
-          maximum: 300
-          example: 70
-        weightGoalType:
-          type: string
-          enum: [lose, maintain, gain]
-          example: lose
+          example: 3
+          description: Target pain level (0-10 scale), optional
+      required:
+        - weightGoalKg
+        - sleepHoursTarget
 
     Meal:
       type: object

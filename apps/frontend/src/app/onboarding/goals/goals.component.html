@@ -1,0 +1,98 @@
+<div class="goals-container">
+  <div class="header">
+    <h1>Set Your Health Goals</h1>
+    <p class="subtitle">
+      Help us understand your targets so we can track your progress
+    </p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="goals-form">
+    <!-- Weight Goal -->
+    <div class="form-group">
+      <label for="weightGoalKg" class="form-label"> Weight Goal (kg) * </label>
+      <input
+        id="weightGoalKg"
+        type="number"
+        class="form-input"
+        formControlName="weightGoalKg"
+        placeholder="Enter your target weight"
+        min="20"
+        max="300"
+        step="0.1"
+        [class.error]="
+          form.get('weightGoalKg')?.invalid && form.get('weightGoalKg')?.touched
+        "
+      />
+      <div class="form-hint">Recommended range: 20-300 kg</div>
+      <div class="error-message" *ngIf="getFieldError('weightGoalKg')">
+        {{ getFieldError("weightGoalKg") }}
+      </div>
+    </div>
+
+    <!-- Sleep Hours Target -->
+    <div class="form-group">
+      <label for="sleepHoursTarget" class="form-label">
+        Sleep Target (hours per night) *
+      </label>
+      <input
+        id="sleepHoursTarget"
+        type="number"
+        class="form-input"
+        formControlName="sleepHoursTarget"
+        placeholder="Enter your sleep goal"
+        min="4"
+        max="12"
+        step="1"
+        [class.error]="
+          form.get('sleepHoursTarget')?.invalid &&
+          form.get('sleepHoursTarget')?.touched
+        "
+      />
+      <div class="form-hint">Most adults need 7-9 hours of sleep</div>
+      <div class="error-message" *ngIf="getFieldError('sleepHoursTarget')">
+        {{ getFieldError("sleepHoursTarget") }}
+      </div>
+    </div>
+
+    <!-- Pain Target -->
+    <div class="form-group">
+      <label for="painTarget" class="form-label">
+        Pain Management Goal (optional)
+      </label>
+      <input
+        id="painTarget"
+        type="number"
+        class="form-input"
+        formControlName="painTarget"
+        placeholder="Target pain level (0-10)"
+        min="0"
+        max="10"
+        step="1"
+        [class.error]="
+          form.get('painTarget')?.invalid && form.get('painTarget')?.touched
+        "
+      />
+      <div class="form-hint">
+        0 = No pain, 10 = Severe pain. Leave empty if not applicable.
+      </div>
+      <div class="error-message" *ngIf="getFieldError('painTarget')">
+        {{ getFieldError("painTarget") }}
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message global-error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="submit-button"
+      [disabled]="isLoading || form.invalid"
+    >
+      <span *ngIf="isLoading" class="loading-spinner"></span>
+      {{ isLoading ? "Saving..." : "Complete Setup" }}
+    </button>
+  </form>
+</div>
