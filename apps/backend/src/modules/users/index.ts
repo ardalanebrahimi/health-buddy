@@ -65,16 +65,32 @@ router.post('/profile', async (req, res) => {
 });
 
 // PUT /profile - Update user profile
-router.put('/profile', (req, res) => {
-  // In a real implementation, validate and update the profile
-  const updatedProfile = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'user@example.com',
-    ...req.body,
-    updatedAt: new Date().toISOString(),
-  };
+router.put('/profile', async (req, res) => {
+  try {
+    // Validate request body
+    const validationResult = validateCreateProfile(req.body);
 
-  res.json(updatedProfile);
+    if (!validationResult.isValid) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input provided',
+          details: validationResult.errors,
+        },
+      });
+    }
+
+    const profile = await ProfileService.createOrUpdateProfile(req.body);
+    res.json(profile);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to update profile',
+      },
+    });
+  }
 });
 
 // PATCH /profile/baseline - Update user baseline health information

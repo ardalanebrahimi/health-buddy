@@ -54,14 +54,14 @@ export class GoalsService {
       const goal = await prisma.goal.upsert({
         where: { userId },
         update: {
-          weightGoalKg: data.weightGoalKg,
+          weightGoalKg: data.weightGoalKg.toString(),
           sleepHoursTarget: data.sleepHoursTarget,
           painTarget: data.painTarget,
           updatedAt: new Date(),
         },
         create: {
           userId,
-          weightGoalKg: data.weightGoalKg,
+          weightGoalKg: data.weightGoalKg.toString(),
           sleepHoursTarget: data.sleepHoursTarget,
           painTarget: data.painTarget,
         },

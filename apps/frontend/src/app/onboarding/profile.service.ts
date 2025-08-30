@@ -1,5 +1,11 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "../services/api.service";
+import { SyncService } from "../services/sync.service";
+import {
+  localDb,
+  LocalProfile,
+  LocalGoals,
+} from "../services/local-database.service";
 import { BehaviorSubject } from "rxjs";
 
 export interface ProfileDto {
@@ -49,102 +55,257 @@ export class ProfileService {
   private profileSubject = new BehaviorSubject<ProfileDto | null>(null);
   public profile$ = this.profileSubject.asObservable();
 
-  private readonly LOCAL_STORAGE_KEY = "health-buddy-profile";
-  private syncQueue: any[] = [];
+  private goalsSubject = new BehaviorSubject<GoalsDto | null>(null);
+  public goals$ = this.goalsSubject.asObservable();
 
-  constructor(private apiService: ApiService) {
-    this.loadLocalMirror();
+  private readonly PROFILE_ID = "current";
+  private readonly GOALS_ID = "current";
+
+  constructor(
+    private apiService: ApiService,
+    private syncService: SyncService
+  ) {
+    this.loadLocalMirrors();
+    this.setupSyncTriggers();
+  }
+
+  private async loadLocalMirrors(): Promise<void> {
+    // Load profile from local storage
+    const localProfile = await localDb.profiles.get(this.PROFILE_ID);
+    if (localProfile) {
+      this.profileSubject.next(localProfile.data);
+    }
+
+    // Load goals from local storage
+    const localGoals = await localDb.goals.get(this.GOALS_ID);
+    if (localGoals) {
+      this.goalsSubject.next(localGoals.data);
+    }
+  }
+
+  private setupSyncTriggers(): void {
+    // When online, try to sync and refresh local data
+    this.syncService.isOnline$.subscribe((isOnline) => {
+      if (isOnline) {
+        this.syncFromServer();
+      }
+    });
+  }
+
+  private async syncFromServer(): Promise<void> {
+    try {
+      // Sync profile
+      const serverProfile = await this.apiService.getProfile();
+      if (serverProfile) {
+        await this.updateLocalProfile(serverProfile as ProfileDto, false);
+        this.profileSubject.next(serverProfile as ProfileDto);
+      }
+    } catch (error) {
+      console.warn("Failed to sync profile from server:", error);
+    }
+
+    try {
+      // Sync goals
+      const serverGoals = await this.apiService.getGoals();
+      if (serverGoals) {
+        await this.updateLocalGoals(serverGoals as GoalsDto, false);
+        this.goalsSubject.next(serverGoals as GoalsDto);
+      }
+    } catch (error) {
+      console.warn("Failed to sync goals from server:", error);
+    }
   }
 
   async getProfile(): Promise<ProfileDto | null> {
-    try {
-      const profile = await this.apiService.getProfile();
-      if (profile) {
-        const typedProfile = profile as ProfileDto;
-        await this.setLocalMirror(typedProfile);
-        this.profileSubject.next(typedProfile);
-        return typedProfile;
+    const localProfile = await localDb.profiles.get(this.PROFILE_ID);
+
+    // If online, try to get fresh data from server
+    if (navigator.onLine) {
+      try {
+        const serverProfile = await this.apiService.getProfile();
+        if (serverProfile) {
+          const typedProfile = serverProfile as ProfileDto;
+          await this.updateLocalProfile(typedProfile, false);
+          this.profileSubject.next(typedProfile);
+          return typedProfile;
+        }
+      } catch (error) {
+        console.warn(
+          "Failed to fetch profile from server, using local mirror:",
+          error
+        );
       }
-      return null;
-    } catch (error) {
-      console.warn("Failed to fetch profile from server, using local mirror");
-      return this.getLocalMirror();
     }
+
+    return localProfile?.data || null;
   }
 
   async saveProfile(dto: CreateProfileDto): Promise<void> {
-    try {
-      const profile = await this.apiService.createProfile(dto);
-      const typedProfile = profile as ProfileDto;
-      await this.setLocalMirror(typedProfile);
-      this.profileSubject.next(typedProfile);
-    } catch (error) {
-      console.warn("Failed to save profile to server, queuing for sync");
-      // Offline → enqueue for sync
-      await this.enqueueSync({
-        method: "POST",
-        path: "/profile",
-        body: dto,
-        idempotencyKey: this.generateUuid(),
-      });
+    const tempProfile: ProfileDto = {
+      id: "temp-" + this.generateUuid(),
+      userId: "single-user-v1",
+      ...dto,
+      baselineJson: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-      // Optimistic update - create a temporary profile for local use
-      const tempProfile: ProfileDto = {
-        id: "temp-" + this.generateUuid(),
-        userId: "single-user-v1",
-        ...dto,
-        baselineJson: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      await this.setLocalMirror(tempProfile);
-      this.profileSubject.next(tempProfile);
+    if (navigator.onLine) {
+      try {
+        const serverProfile = await this.apiService.createProfile(dto);
+        const typedProfile = serverProfile as ProfileDto;
+        await this.updateLocalProfile(typedProfile, false);
+        this.profileSubject.next(typedProfile);
+        return;
+      } catch (error) {
+        console.warn(
+          "Failed to save profile to server, queuing for sync:",
+          error
+        );
+      }
     }
+
+    // Offline or failed - store locally and queue for sync
+    await this.updateLocalProfile(tempProfile, true);
+    this.profileSubject.next(tempProfile);
+
+    await this.syncService.enqueueSync({
+      method: "POST",
+      path: "/profile",
+      body: dto,
+    });
   }
 
   async updateBaseline(dto: UpdateBaselineDto): Promise<void> {
-    try {
-      const updatedProfile = await this.apiService.updateBaseline(dto);
-      if (updatedProfile) {
-        const typedProfile = updatedProfile as ProfileDto;
-        await this.setLocalMirror(typedProfile);
-        this.profileSubject.next(typedProfile);
+    if (navigator.onLine) {
+      try {
+        const updatedProfile = await this.apiService.updateBaseline(dto);
+        if (updatedProfile) {
+          const typedProfile = updatedProfile as ProfileDto;
+          await this.updateLocalProfile(typedProfile, false);
+          this.profileSubject.next(typedProfile);
+          return;
+        }
+      } catch (error) {
+        console.warn(
+          "Failed to update baseline on server, queuing for sync:",
+          error
+        );
       }
-    } catch (error) {
-      console.error(
-        "Failed to update baseline, enqueueing for later sync:",
-        error
-      );
-
-      // Update local mirror with baseline data
-      const currentProfile = this.getLocalMirror();
-      if (currentProfile) {
-        const updatedProfile = {
-          ...currentProfile,
-          baselineJson: {
-            conditions: dto.conditions || [],
-            painAreas: dto.painAreas || [],
-            notes: dto.notes || null,
-          },
-          updatedAt: new Date().toISOString(),
-        };
-
-        await this.setLocalMirror(updatedProfile);
-        this.profileSubject.next(updatedProfile);
-      }
-
-      // Queue for sync when online
-      await this.enqueueSync({
-        type: "updateBaseline",
-        data: dto,
-        timestamp: new Date().toISOString(),
-      });
     }
+
+    // Offline or failed - update locally and queue for sync
+    const currentProfile = await this.getProfile();
+    if (currentProfile) {
+      const updatedProfile = {
+        ...currentProfile,
+        baselineJson: {
+          conditions: dto.conditions || [],
+          painAreas: dto.painAreas || [],
+          notes: dto.notes || null,
+        },
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.updateLocalProfile(updatedProfile, true);
+      this.profileSubject.next(updatedProfile);
+    }
+
+    await this.syncService.enqueueSync({
+      method: "PATCH",
+      path: "/profile/baseline",
+      body: dto,
+    });
+  }
+
+  async getGoals(): Promise<GoalsDto | null> {
+    const localGoals = await localDb.goals.get(this.GOALS_ID);
+
+    // If online, try to get fresh data from server
+    if (navigator.onLine) {
+      try {
+        const serverGoals = await this.apiService.getGoals();
+        if (serverGoals) {
+          const typedGoals = serverGoals as GoalsDto;
+          await this.updateLocalGoals(typedGoals, false);
+          this.goalsSubject.next(typedGoals);
+          return typedGoals;
+        }
+      } catch (error) {
+        console.warn(
+          "Failed to fetch goals from server, using local mirror:",
+          error
+        );
+      }
+    }
+
+    return localGoals?.data || null;
+  }
+
+  async saveGoals(dto: UpdateGoalsDto): Promise<GoalsDto> {
+    const optimisticGoals: GoalsDto = {
+      ...dto,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (navigator.onLine) {
+      try {
+        const serverGoals = await this.apiService.updateGoals(dto);
+        const typedGoals = serverGoals as GoalsDto;
+        await this.updateLocalGoals(typedGoals, false);
+        this.goalsSubject.next(typedGoals);
+        return typedGoals;
+      } catch (error) {
+        console.warn(
+          "Failed to save goals to server, queuing for sync:",
+          error
+        );
+      }
+    }
+
+    // Offline or failed - store locally and queue for sync
+    await this.updateLocalGoals(optimisticGoals, true);
+    this.goalsSubject.next(optimisticGoals);
+
+    await this.syncService.enqueueSync({
+      method: "PUT",
+      path: "/goals",
+      body: dto,
+    });
+
+    return optimisticGoals;
+  }
+
+  private async updateLocalProfile(
+    profile: ProfileDto,
+    pendingSync: boolean
+  ): Promise<void> {
+    const localProfile: LocalProfile = {
+      id: this.PROFILE_ID,
+      data: profile,
+      pending_sync: pendingSync,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    await localDb.profiles.put(localProfile);
+  }
+
+  private async updateLocalGoals(
+    goals: GoalsDto,
+    pendingSync: boolean
+  ): Promise<void> {
+    const localGoals: LocalGoals = {
+      id: this.GOALS_ID,
+      data: goals,
+      pending_sync: pendingSync,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    await localDb.goals.put(localGoals);
   }
 
   isProfileComplete(): boolean {
-    const profile = this.getLocalMirror();
+    const profile = this.profileSubject.value;
     return (
       profile !== null &&
       !!profile.age &&
@@ -158,37 +319,14 @@ export class ProfileService {
     );
   }
 
-  private getLocalMirror(): ProfileDto | null {
-    try {
-      const stored = localStorage.getItem(this.LOCAL_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
+  async getProfileSyncStatus(): Promise<boolean> {
+    const localProfile = await localDb.profiles.get(this.PROFILE_ID);
+    return localProfile?.pending_sync || false;
   }
 
-  private async setLocalMirror(profile: ProfileDto): Promise<void> {
-    try {
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(profile));
-    } catch (error) {
-      console.error("Failed to save profile to local storage:", error);
-    }
-  }
-
-  private loadLocalMirror(): void {
-    const profile = this.getLocalMirror();
-    if (profile) {
-      this.profileSubject.next(profile);
-    }
-  }
-
-  private async enqueueSync(item: any): Promise<void> {
-    // Simple sync queue implementation
-    this.syncQueue.push(item);
-    localStorage.setItem(
-      "health-buddy-sync-queue",
-      JSON.stringify(this.syncQueue)
-    );
+  async getGoalsSyncStatus(): Promise<boolean> {
+    const localGoals = await localDb.goals.get(this.GOALS_ID);
+    return localGoals?.pending_sync || false;
   }
 
   private generateUuid(): string {
@@ -199,78 +337,24 @@ export class ProfileService {
     });
   }
 
-  // TODO: Implement sync replay when online
-  async replaySyncQueue(): Promise<void> {
-    // This would be called when the app comes back online
-    // For now, just clear the queue
-    this.syncQueue = [];
-    localStorage.removeItem("health-buddy-sync-queue");
-  }
-
-  /**
-   * Get user goals
-   */
-  async getGoals(): Promise<GoalsDto | null> {
+  // For migration from old localStorage-based approach
+  private async migrateOldData(): Promise<void> {
     try {
-      const response = await this.apiService.getGoals();
-      return response as GoalsDto;
-    } catch (error) {
-      console.warn(
-        "Failed to fetch goals from API, checking local mirror:",
-        error
-      );
-
-      // Check local storage for cached goals
-      const cachedGoals = localStorage.getItem("health-buddy-goals");
-      if (cachedGoals) {
-        return JSON.parse(cachedGoals);
+      const oldProfile = localStorage.getItem("health-buddy-profile");
+      if (oldProfile) {
+        const profileData = JSON.parse(oldProfile);
+        await this.updateLocalProfile(profileData, false);
+        localStorage.removeItem("health-buddy-profile");
       }
 
-      return null;
-    }
-  }
-
-  /**
-   * Save user goals (with offline support)
-   */
-  async saveGoals(dto: UpdateGoalsDto): Promise<GoalsDto> {
-    try {
-      const response = await this.apiService.updateGoals(dto);
-      const goals = response as GoalsDto;
-
-      // Cache locally
-      localStorage.setItem("health-buddy-goals", JSON.stringify(goals));
-
-      return goals;
+      const oldGoals = localStorage.getItem("health-buddy-goals");
+      if (oldGoals) {
+        const goalsData = JSON.parse(oldGoals);
+        await this.updateLocalGoals(goalsData, false);
+        localStorage.removeItem("health-buddy-goals");
+      }
     } catch (error) {
-      console.warn("Failed to save goals to API, queuing for sync:", error);
-
-      // Create optimistic update
-      const optimisticGoals: GoalsDto = {
-        ...dto,
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Cache locally
-      localStorage.setItem(
-        "health-buddy-goals",
-        JSON.stringify(optimisticGoals)
-      );
-
-      // Queue for sync when online
-      this.syncQueue.push({
-        id: this.generateUuid(),
-        method: "PUT",
-        endpoint: "/goals",
-        data: dto,
-        timestamp: new Date().toISOString(),
-      });
-      localStorage.setItem(
-        "health-buddy-sync-queue",
-        JSON.stringify(this.syncQueue)
-      );
-
-      return optimisticGoals;
+      console.warn("Failed to migrate old data:", error);
     }
   }
 }

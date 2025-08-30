@@ -47,6 +47,15 @@ export class ApiService {
     }
   }
 
+  async updateProfile(data: any) {
+    try {
+      return await this.client.updateProfile(data);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      throw error;
+    }
+  }
+
   async updateBaseline(data: any) {
     try {
       return await this.client.updateBaseline(data);

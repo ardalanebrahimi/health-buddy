@@ -23,6 +23,7 @@
     "@capacitor/app": "^7.0.2",
     "@capacitor/core": "^7.4.3",
     "@capacitor/preferences": "^7.0.2",
+    "dexie": "^4.2.0",
     "health-companion-sdk": "file:../../packages/sdk",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
