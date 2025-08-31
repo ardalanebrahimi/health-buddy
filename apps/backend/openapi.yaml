@@ -525,6 +525,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /hydration/summary:
+    get:
+      tags:
+        - hydration
+      summary: Get hydration summary
+      description: Get daily hydration summary with total liters for a specific date
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date to get hydration summary (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Hydration summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationSummary'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hydration/{id}:
+    delete:
+      tags:
+        - hydration
+      summary: Delete hydration entry
+      description: Delete a specific hydration entry (for undo functionality)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Hydration entry ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Hydration entry deleted successfully
+        '404':
+          description: Hydration entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /biometrics/weight:
     get:
       tags:
@@ -1373,17 +1432,12 @@ components:
           minimum: 0
           maximum: 3000
           example: 250
-        type:
-          type: string
-          enum: [water, tea, coffee, juice, other]
-          example: water
         takenAt:
           type: string
           format: date-time
           example: '2025-08-30T14:30:00Z'
       required:
         - amountMl
-        - type
         - takenAt
 
     HydrationResponse:
@@ -1410,6 +1464,21 @@ components:
         - totalMl
         - goalMl
         - date
+
+    HydrationSummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2025-08-30'
+        totalLiters:
+          type: number
+          minimum: 0
+          example: 1.5
+      required:
+        - date
+        - totalLiters
 
     WeightEntry:
       type: object

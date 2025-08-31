@@ -1,0 +1,184 @@
+.hydration-container {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.hydration-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.hydration-header h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.total-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.total-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2196F3;
+}
+
+.total-unit {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #2196F3;
+}
+
+.total-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.hydration-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.hydration-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: #2196F3;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  font-family: inherit;
+}
+
+.hydration-btn:hover:not(:disabled) {
+  background: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.hydration-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.hydration-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-amount {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.btn-unit {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.hydration-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.undo-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.undo-btn:hover:not(:disabled) {
+  border-color: #2196F3;
+  color: #2196F3;
+  background: #f5f5f5;
+}
+
+.undo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.undo-icon {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ddd;
+  border-top: 2px solid #2196F3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .hydration-container {
+    padding: 0.75rem;
+    margin: 0 0.5rem;
+  }
+  
+  .hydration-buttons {
+    gap: 0.75rem;
+  }
+  
+  .hydration-btn {
+    padding: 0.875rem 1.25rem;
+    min-width: 70px;
+  }
+  
+  .total-value {
+    font-size: 2rem;
+  }
+  
+  .total-unit {
+    font-size: 1.25rem;
+  }
+}

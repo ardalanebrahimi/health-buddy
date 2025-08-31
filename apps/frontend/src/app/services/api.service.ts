@@ -100,4 +100,45 @@ export class ApiService {
       throw error;
     }
   }
+
+  // Hydration endpoints
+  async getHydration(params?: { date?: string }) {
+    try {
+      return await this.client.getHydration(params);
+    } catch (error) {
+      console.error("Failed to get hydration:", error);
+      throw error;
+    }
+  }
+
+  async createHydration(data: { amountMl: number; takenAt: string }) {
+    try {
+      return await this.client.createHydration(data);
+    } catch (error) {
+      console.error("Failed to create hydration:", error);
+      throw error;
+    }
+  }
+
+  async getHydrationSummary(date: string) {
+    try {
+      // For now, make a direct HTTP call since the SDK might not have this method yet
+      const response = await this.client['client'].get(`/hydration/summary?date=${date}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to get hydration summary:", error);
+      throw error;
+    }
+  }
+
+  async deleteHydration(id: string) {
+    try {
+      // For now, make a direct HTTP call since the SDK might not have this method yet
+      const response = await this.client['client'].delete(`/hydration/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete hydration:", error);
+      throw error;
+    }
+  }
 }

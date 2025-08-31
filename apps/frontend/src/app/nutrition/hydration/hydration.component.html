@@ -1,0 +1,46 @@
+<div class="hydration-container">
+  <div class="hydration-header">
+    <h3>Hydration</h3>
+    <div class="total-display">
+      <span class="total-value">{{ formatLiters(totalLiters()) }}</span>
+      <span class="total-unit">L</span>
+      <span class="total-label">today</span>
+    </div>
+  </div>
+
+  <div class="hydration-buttons">
+    <button 
+      class="hydration-btn quick-add-250" 
+      (click)="add(250)" 
+      [disabled]="isLoading()"
+      type="button">
+      <span class="btn-amount">+250</span>
+      <span class="btn-unit">ml</span>
+    </button>
+    
+    <button 
+      class="hydration-btn quick-add-500" 
+      (click)="add(500)" 
+      [disabled]="isLoading()"
+      type="button">
+      <span class="btn-amount">+500</span>
+      <span class="btn-unit">ml</span>
+    </button>
+  </div>
+
+  <div class="hydration-actions">
+    <button 
+      class="undo-btn" 
+      (click)="undo()" 
+      [disabled]="isLoading() || !lastEntryId()"
+      type="button">
+      <span class="undo-icon">↶</span>
+      <span>Undo Last</span>
+    </button>
+  </div>
+
+  <div class="loading-indicator" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <span>Logging...</span>
+  </div>
+</div>
