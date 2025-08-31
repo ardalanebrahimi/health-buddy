@@ -730,6 +730,150 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /biometrics/bp:
+    get:
+      tags:
+        - biometrics
+      summary: Get blood pressure entries
+      description: Retrieve blood pressure measurements for recent entries
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Blood pressure entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BPEntriesResponse'
+    post:
+      tags:
+        - biometrics
+      summary: Log blood pressure
+      description: Log a new blood pressure measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBPRequest'
+      responses:
+        '201':
+          description: Blood pressure logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BPEntry'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/bp/recent:
+    get:
+      tags:
+        - biometrics
+      summary: Get recent blood pressure entries
+      description: Retrieve the most recent blood pressure measurements
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Recent blood pressure entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BPEntry'
+
+  /biometrics/hr:
+    get:
+      tags:
+        - biometrics
+      summary: Get heart rate entries
+      description: Retrieve heart rate measurements for recent entries
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Heart rate entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HREntriesResponse'
+    post:
+      tags:
+        - biometrics
+      summary: Log heart rate
+      description: Log a new resting heart rate measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHRRequest'
+      responses:
+        '201':
+          description: Heart rate logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HREntry'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/hr/recent:
+    get:
+      tags:
+        - biometrics
+      summary: Get recent heart rate entries
+      description: Retrieve the most recent heart rate measurements
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Recent heart rate entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HREntry'
+
   /daily-summary:
     get:
       tags:
@@ -1677,6 +1821,142 @@ components:
           type: string
           format: date
           example: '2025-08-30'
+      required:
+        - entries
+        - total
+
+    BPEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        systolic:
+          type: integer
+          minimum: 80
+          maximum: 200
+          example: 128
+        diastolic:
+          type: integer
+          minimum: 50
+          maximum: 120
+          example: 82
+        pulse:
+          type: integer
+          minimum: 40
+          maximum: 180
+          example: 72
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - id
+        - systolic
+        - diastolic
+        - pulse
+        - takenAt
+        - createdAt
+
+    CreateBPRequest:
+      type: object
+      properties:
+        systolic:
+          type: integer
+          minimum: 80
+          maximum: 200
+          example: 128
+        diastolic:
+          type: integer
+          minimum: 50
+          maximum: 120
+          example: 82
+        pulse:
+          type: integer
+          minimum: 40
+          maximum: 180
+          example: 72
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - systolic
+        - diastolic
+        - pulse
+
+    BPEntriesResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/BPEntry'
+        total:
+          type: integer
+          minimum: 0
+          example: 10
+      required:
+        - entries
+        - total
+
+    HREntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        bpm:
+          type: integer
+          minimum: 30
+          maximum: 200
+          example: 62
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - id
+        - bpm
+        - takenAt
+        - createdAt
+
+    CreateHRRequest:
+      type: object
+      properties:
+        bpm:
+          type: integer
+          minimum: 30
+          maximum: 200
+          example: 62
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - bpm
+
+    HREntriesResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/HREntry'
+        total:
+          type: integer
+          minimum: 0
+          example: 10
       required:
         - entries
         - total

@@ -1,0 +1,184 @@
+<div class="bp-hr-container">
+  <h2>Blood Pressure & Heart Rate</h2>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button
+      [class.active]="activeTab === 'bp'"
+      (click)="switchTab('bp')"
+      class="tab-button"
+    >
+      Blood Pressure
+    </button>
+    <button
+      [class.active]="activeTab === 'hr'"
+      (click)="switchTab('hr')"
+      class="tab-button"
+    >
+      Resting Heart Rate
+    </button>
+  </div>
+
+  <!-- Blood Pressure Tab -->
+  <div *ngIf="activeTab === 'bp'" class="tab-content">
+    <form [formGroup]="bpForm" (ngSubmit)="saveBP()" class="bp-form">
+      <h3>Log Blood Pressure</h3>
+
+      <div class="form-group">
+        <label for="systolic">Systolic (mmHg)</label>
+        <input
+          id="systolic"
+          type="number"
+          formControlName="systolic"
+          placeholder="120"
+          min="80"
+          max="200"
+          class="form-input"
+        />
+        <div
+          *ngIf="
+            bpForm.get('systolic')?.invalid && bpForm.get('systolic')?.touched
+          "
+          class="error"
+        >
+          Systolic must be between 80-200 mmHg
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="diastolic">Diastolic (mmHg)</label>
+        <input
+          id="diastolic"
+          type="number"
+          formControlName="diastolic"
+          placeholder="80"
+          min="50"
+          max="120"
+          class="form-input"
+        />
+        <div
+          *ngIf="
+            bpForm.get('diastolic')?.invalid && bpForm.get('diastolic')?.touched
+          "
+          class="error"
+        >
+          Diastolic must be between 50-120 mmHg
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bpPulse">Pulse (bpm)</label>
+        <input
+          id="bpPulse"
+          type="number"
+          formControlName="pulse"
+          placeholder="72"
+          min="40"
+          max="180"
+          class="form-input"
+        />
+        <div
+          *ngIf="bpForm.get('pulse')?.invalid && bpForm.get('pulse')?.touched"
+          class="error"
+        >
+          Pulse must be between 40-180 bpm
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bpTakenAt">Date & Time</label>
+        <input
+          id="bpTakenAt"
+          type="datetime-local"
+          formControlName="takenAt"
+          class="form-input"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="!isBPFormValid || isLoading"
+        class="save-button"
+      >
+        {{ isLoading ? "Saving..." : "Save Blood Pressure" }}
+      </button>
+    </form>
+
+    <!-- Recent BP Entries -->
+    <div class="recent-entries">
+      <h4>Recent Entries</h4>
+      <div *ngIf="isLoading" class="loading">Loading...</div>
+      <div *ngIf="!isLoading && recentBP.length === 0" class="no-entries">
+        No blood pressure entries yet
+      </div>
+      <div *ngFor="let entry of recentBP" class="entry-card">
+        <div class="entry-values">
+          <span class="bp-reading"
+            >{{ entry.systolic }}/{{ entry.diastolic }}</span
+          >
+          <span class="pulse">Pulse: {{ entry.pulse }} bpm</span>
+        </div>
+        <div class="entry-date">{{ formatDateTime(entry.takenAt) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heart Rate Tab -->
+  <div *ngIf="activeTab === 'hr'" class="tab-content">
+    <form [formGroup]="hrForm" (ngSubmit)="saveHR()" class="hr-form">
+      <h3>Log Resting Heart Rate</h3>
+
+      <div class="form-group">
+        <label for="bpm">Heart Rate (bpm)</label>
+        <input
+          id="bpm"
+          type="number"
+          formControlName="bpm"
+          placeholder="62"
+          min="30"
+          max="200"
+          class="form-input"
+        />
+        <div
+          *ngIf="hrForm.get('bpm')?.invalid && hrForm.get('bpm')?.touched"
+          class="error"
+        >
+          Heart rate must be between 30-200 bpm
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="hrTakenAt">Date & Time</label>
+        <input
+          id="hrTakenAt"
+          type="datetime-local"
+          formControlName="takenAt"
+          class="form-input"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="!isHRFormValid || isLoading"
+        class="save-button"
+      >
+        {{ isLoading ? "Saving..." : "Save Heart Rate" }}
+      </button>
+    </form>
+
+    <!-- Recent HR Entries -->
+    <div class="recent-entries">
+      <h4>Recent Entries</h4>
+      <div *ngIf="isLoading" class="loading">Loading...</div>
+      <div *ngIf="!isLoading && recentHR.length === 0" class="no-entries">
+        No heart rate entries yet
+      </div>
+      <div *ngFor="let entry of recentHR" class="entry-card">
+        <div class="entry-values">
+          <span class="hr-reading">{{ entry.bpm }} bpm</span>
+        </div>
+        <div class="entry-date">{{ formatDateTime(entry.takenAt) }}</div>
+      </div>
+    </div>
+  </div>
+</div>

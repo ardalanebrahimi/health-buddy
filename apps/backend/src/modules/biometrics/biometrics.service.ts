@@ -4,6 +4,10 @@ import {
   WeightEntry,
   CreateWaistRequest,
   WaistEntry,
+  CreateBPRequest,
+  BPEntry,
+  CreateHRRequest,
+  HREntry,
 } from './biometrics.dto';
 
 export class BiometricsService {
@@ -167,5 +171,99 @@ export class BiometricsService {
       entries,
       total: entries.length,
     };
+  }
+
+  async logBP(data: CreateBPRequest & { userId: string }): Promise<BPEntry> {
+    // Validate blood pressure ranges
+    if (data.systolic < 80 || data.systolic > 200) {
+      throw new Error('Systolic pressure must be between 80 and 200 mmHg');
+    }
+    if (data.diastolic < 50 || data.diastolic > 120) {
+      throw new Error('Diastolic pressure must be between 50 and 120 mmHg');
+    }
+    if (data.pulse < 40 || data.pulse > 180) {
+      throw new Error('Pulse must be between 40 and 180 bpm');
+    }
+
+    const result = await this.prisma.biometricsBP.create({
+      data: {
+        userId: data.userId,
+        systolic: data.systolic,
+        diastolic: data.diastolic,
+        pulse: data.pulse,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+      },
+    });
+
+    // Log telemetry
+    console.log(
+      `bp_logged ${data.systolic}/${data.diastolic} pulse:${data.pulse} ${data.userId}`
+    );
+
+    return {
+      id: result.id,
+      systolic: result.systolic,
+      diastolic: result.diastolic,
+      pulse: result.pulse,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getRecentBP(userId: string, limit: number = 10): Promise<BPEntry[]> {
+    const results = await this.prisma.biometricsBP.findMany({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+      take: limit,
+    });
+
+    return results.map((result) => ({
+      id: result.id,
+      systolic: result.systolic,
+      diastolic: result.diastolic,
+      pulse: result.pulse,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    }));
+  }
+
+  async logHR(data: CreateHRRequest & { userId: string }): Promise<HREntry> {
+    // Validate heart rate range
+    if (data.bpm < 30 || data.bpm > 200) {
+      throw new Error('Heart rate must be between 30 and 200 bpm');
+    }
+
+    const result = await this.prisma.biometricsHR.create({
+      data: {
+        userId: data.userId,
+        bpm: data.bpm,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+      },
+    });
+
+    // Log telemetry
+    console.log(`hr_logged ${data.bpm} ${data.userId}`);
+
+    return {
+      id: result.id,
+      bpm: result.bpm,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getRecentHR(userId: string, limit: number = 10): Promise<HREntry[]> {
+    const results = await this.prisma.biometricsHR.findMany({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+      take: limit,
+    });
+
+    return results.map((result) => ({
+      id: result.id,
+      bpm: result.bpm,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    }));
   }
 }

@@ -7,6 +7,10 @@ import {
   logWaist,
   getLatestWaist,
   getWaistEntries,
+  logBP,
+  getRecentBP,
+  logHR,
+  getRecentHR,
 } from './biometrics.controller';
 
 const router: ExpressRouter = Router();
@@ -28,5 +32,17 @@ router.post('/waist', logWaist);
 
 // GET /biometrics/waist/latest - Get latest waist circumference
 router.get('/waist/latest', getLatestWaist);
+
+// GET /biometrics/bp/recent - Get recent blood pressure entries
+router.get('/bp/recent', getRecentBP);
+
+// POST /biometrics/bp - Log blood pressure
+router.post('/bp', logBP);
+
+// GET /biometrics/hr/recent - Get recent heart rate entries
+router.get('/hr/recent', getRecentHR);
+
+// POST /biometrics/hr - Log heart rate
+router.post('/hr', logHR);
 
 export default router;

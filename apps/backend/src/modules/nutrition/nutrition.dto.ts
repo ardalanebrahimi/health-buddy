@@ -48,7 +48,13 @@ export type CreateMealRequest = z.infer<typeof CreateMealDto>;
 
 export const FoodSearchDto = z.object({
   q: z.string().min(1),
-  limit: z.number().min(1).max(50).optional(),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : undefined))
+    .refine((val) => val === undefined || (val >= 1 && val <= 50), {
+      message: 'limit must be between 1 and 50',
+    }),
 });
 
 export type FoodSearchRequest = z.infer<typeof FoodSearchDto>;

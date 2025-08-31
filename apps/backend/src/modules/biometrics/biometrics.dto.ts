@@ -21,3 +21,31 @@ export interface WaistEntry {
   takenAt: string;
   createdAt: string;
 }
+
+export interface CreateBPRequest {
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  takenAt?: string;
+}
+
+export interface BPEntry {
+  id: string;
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface CreateHRRequest {
+  bpm: number;
+  takenAt?: string;
+}
+
+export interface HREntry {
+  id: string;
+  bpm: number;
+  takenAt: string;
+  createdAt: string;
+}

@@ -111,6 +111,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "biometrics/bp-hr",
+    loadComponent: () =>
+      import("./biometrics/bp-hr/bp-hr-log.component").then(
+        (m) => m.BpHrLogComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {

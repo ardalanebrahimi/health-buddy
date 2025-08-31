@@ -131,6 +131,30 @@ model BiometricsWaist {
   @@map("biometrics_waist")
 }
 
+model BiometricsBP {
+  id        String   @id @default(uuid())
+  userId    String
+  systolic  Int
+  diastolic Int
+  pulse     Int
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_bp")
+}
+
+model BiometricsHR {
+  id        String   @id @default(uuid())
+  userId    String
+  bpm       Int
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_hr")
+}
+
 model CompanionMessage {
   id        String   @id @default(uuid())
   userId    String

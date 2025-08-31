@@ -49,6 +49,11 @@
         <span>Weight Log</span>
         <small>Track daily weight</small>
       </button>
+      <button class="module-btn biometrics" routerLink="/biometrics/bp-hr">
+        <div class="icon">💓</div>
+        <span>BP & Heart Rate</span>
+        <small>Blood pressure & HR</small>
+      </button>
       <button class="module-btn dashboard" disabled>
         <div class="icon">📈</div>
         <span>Dashboard</span>
@@ -66,9 +71,14 @@
   <div class="weight-section" *ngIf="apiStatus === 'ok'">
     <div class="section-header">
       <h3>Latest Weight</h3>
-      <button class="quick-action-btn" routerLink="/biometrics/weight">
-        + Weight
-      </button>
+      <div class="action-buttons">
+        <button class="quick-action-btn" routerLink="/biometrics/weight">
+          + Weight
+        </button>
+        <button class="quick-action-btn" routerLink="/biometrics/bp-hr">
+          + BP/HR
+        </button>
+      </div>
     </div>
 
     <div class="weight-card" *ngIf="latestWeight; else noWeight">
@@ -123,6 +133,14 @@
               dailySummary.weight.trend
             }})</span
           >
+        </div>
+        <div class="stat" *ngIf="latestBP && isTodayData(latestBP.takenAt)">
+          <label>Blood Pressure:</label>
+          <span>{{ latestBP.systolic }}/{{ latestBP.diastolic }} mmHg</span>
+        </div>
+        <div class="stat" *ngIf="latestHR && isTodayData(latestHR.takenAt)">
+          <label>Resting HR:</label>
+          <span>{{ latestHR.bpm }} bpm</span>
         </div>
       </div>
     </div>

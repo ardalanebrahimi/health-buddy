@@ -5,6 +5,8 @@ import { ApiService } from "../services/api.service";
 import {
   BiometricsService,
   WeightEntry,
+  BPEntry,
+  HREntry,
 } from "../biometrics/biometrics.service";
 
 @Component({
@@ -22,6 +24,8 @@ export class HomeComponent implements OnInit {
   dailySummary: any = null;
   companionMessage: any = null;
   latestWeight: WeightEntry | null = null;
+  latestBP: BPEntry | null = null;
+  latestHR: HREntry | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -30,6 +34,8 @@ export class HomeComponent implements OnInit {
     this.loadDailySummary();
     this.loadCompanionMessage();
     this.loadLatestWeight();
+    this.loadLatestBP();
+    this.loadLatestHR();
   }
 
   async checkApiHealth() {
@@ -74,5 +80,28 @@ export class HomeComponent implements OnInit {
     } catch (error) {
       console.error("Failed to load latest weight:", error);
     }
+  }
+
+  async loadLatestBP() {
+    try {
+      this.latestBP = await this.biometricsService.getLatestBP();
+    } catch (error) {
+      console.error("Failed to load latest blood pressure:", error);
+    }
+  }
+
+  async loadLatestHR() {
+    try {
+      this.latestHR = await this.biometricsService.getLatestHR();
+    } catch (error) {
+      console.error("Failed to load latest heart rate:", error);
+    }
+  }
+
+  // Helper methods to check if biometric data is from today
+  isTodayData(takenAt: string): boolean {
+    const today = new Date().toDateString();
+    const dataDate = new Date(takenAt).toDateString();
+    return today === dataDate;
   }
 }

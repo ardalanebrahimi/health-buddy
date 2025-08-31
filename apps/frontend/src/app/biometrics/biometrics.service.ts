@@ -26,6 +26,34 @@ export interface LogWaistRequest {
   takenAt?: string;
 }
 
+export interface BPEntry {
+  id: string;
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface LogBPRequest {
+  systolic: number;
+  diastolic: number;
+  pulse: number;
+  takenAt?: string;
+}
+
+export interface HREntry {
+  id: string;
+  bpm: number;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface LogHRRequest {
+  bpm: number;
+  takenAt?: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -40,11 +68,21 @@ export class BiometricsService {
   private latestWaistSubject = new BehaviorSubject<WaistEntry | null>(null);
   public latestWaist$ = this.latestWaistSubject.asObservable();
 
+  // Local cache for latest BP
+  private latestBPSubject = new BehaviorSubject<BPEntry | null>(null);
+  public latestBP$ = this.latestBPSubject.asObservable();
+
+  // Local cache for latest HR
+  private latestHRSubject = new BehaviorSubject<HREntry | null>(null);
+  public latestHR$ = this.latestHRSubject.asObservable();
+
   constructor() {
     this.client = new HealthCompanionClient("http://localhost:3000/api/v1");
     // Load latest values on service initialization
     this.loadLatestWeight();
     this.loadLatestWaist();
+    this.loadLatestBP();
+    this.loadLatestHR();
   }
 
   async logWeight(valueKg: number, takenAt?: string): Promise<WeightEntry> {
@@ -205,5 +243,83 @@ export class BiometricsService {
 
   private async loadLatestWaist(): Promise<void> {
     await this.getLatestWaist();
+  }
+
+  // Blood Pressure methods
+  async logBP(data: LogBPRequest): Promise<BPEntry> {
+    try {
+      const result = await this.client.createBPEntry(data);
+      // Update latest BP cache if this entry is more recent
+      await this.loadLatestBP();
+      return result;
+    } catch (error) {
+      console.error("Error logging blood pressure:", error);
+      throw error;
+    }
+  }
+
+  async getRecentBP(limit: number = 10): Promise<BPEntry[]> {
+    try {
+      const result = await this.client.getRecentBP({ limit });
+      return result;
+    } catch (error) {
+      console.error("Error getting recent blood pressure:", error);
+      return [];
+    }
+  }
+
+  async getLatestBP(): Promise<BPEntry | null> {
+    try {
+      const recent = await this.getRecentBP(1);
+      const latest = recent.length > 0 ? recent[0] : null;
+      this.latestBPSubject.next(latest);
+      return latest;
+    } catch (error) {
+      console.error("Error getting latest blood pressure:", error);
+      return null;
+    }
+  }
+
+  // Heart Rate methods
+  async logHR(data: LogHRRequest): Promise<HREntry> {
+    try {
+      const result = await this.client.createHREntry(data);
+      // Update latest HR cache if this entry is more recent
+      await this.loadLatestHR();
+      return result;
+    } catch (error) {
+      console.error("Error logging heart rate:", error);
+      throw error;
+    }
+  }
+
+  async getRecentHR(limit: number = 10): Promise<HREntry[]> {
+    try {
+      const result = await this.client.getRecentHR({ limit });
+      return result;
+    } catch (error) {
+      console.error("Error getting recent heart rate:", error);
+      return [];
+    }
+  }
+
+  async getLatestHR(): Promise<HREntry | null> {
+    try {
+      const recent = await this.getRecentHR(1);
+      const latest = recent.length > 0 ? recent[0] : null;
+      this.latestHRSubject.next(latest);
+      return latest;
+    } catch (error) {
+      console.error("Error getting latest heart rate:", error);
+      return null;
+    }
+  }
+
+  private async loadLatestBP(): Promise<void> {
+    await this.getLatestBP();
+  }
+
+  private async loadLatestHR(): Promise<void> {
+    await this.getLatestHR();
   }
 }
