@@ -1,0 +1,210 @@
+<div class="meal-edit-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-button" (click)="cancel()" type="button">
+      <span class="back-icon">←</span>
+    </button>
+    <h1 class="page-title">Edit {{ mealName }}</h1>
+    <div class="edited-badge" *ngIf="hasEditedItems()">
+      <span class="badge">Edited</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading meal details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-message" *ngIf="error">
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="ngOnInit()" *ngIf="!loading">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content" *ngIf="!loading && !error">
+    <!-- Items List -->
+    <form [formGroup]="itemsForm" class="items-form">
+      <div class="items-section">
+        <h2 class="section-title">Food Items</h2>
+
+        <div class="items-list" [formArrayName]="'itemsForm'">
+          <div
+            class="item-card"
+            *ngFor="let itemControl of itemsForm.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <div class="item-header">
+              <div class="item-number">{{ i + 1 }}</div>
+            </div>
+
+            <div class="item-content">
+              <!-- Food Name -->
+              <div class="form-group">
+                <label for="name-{{ i }}">Food Name</label>
+                <input
+                  id="name-{{ i }}"
+                  type="text"
+                  formControlName="name"
+                  class="form-input"
+                  [class.error]="
+                    getItemControl(i, 'name').invalid &&
+                    getItemControl(i, 'name').touched
+                  "
+                  placeholder="Enter food name"
+                />
+                <div
+                  class="error-text"
+                  *ngIf="
+                    getItemControl(i, 'name').invalid &&
+                    getItemControl(i, 'name').touched
+                  "
+                >
+                  Food name is required
+                </div>
+              </div>
+
+              <!-- Portion -->
+              <div class="form-group">
+                <label for="portion-{{ i }}">Portion (grams)</label>
+                <input
+                  id="portion-{{ i }}"
+                  type="number"
+                  formControlName="portionGrams"
+                  class="form-input"
+                  [class.error]="
+                    getItemControl(i, 'portionGrams').invalid &&
+                    getItemControl(i, 'portionGrams').touched
+                  "
+                  placeholder="0"
+                  min="0"
+                  step="1"
+                />
+                <div
+                  class="error-text"
+                  *ngIf="
+                    getItemControl(i, 'portionGrams').invalid &&
+                    getItemControl(i, 'portionGrams').touched
+                  "
+                >
+                  Portion must be a positive number
+                </div>
+              </div>
+
+              <!-- Macros Row -->
+              <div class="macros-row">
+                <div class="form-group macro-input">
+                  <label for="calories-{{ i }}">Calories</label>
+                  <input
+                    id="calories-{{ i }}"
+                    type="number"
+                    formControlName="calories"
+                    class="form-input"
+                    placeholder="0"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+
+                <div class="form-group macro-input">
+                  <label for="protein-{{ i }}">Protein (g)</label>
+                  <input
+                    id="protein-{{ i }}"
+                    type="number"
+                    formControlName="protein"
+                    class="form-input"
+                    placeholder="0"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+
+                <div class="form-group macro-input">
+                  <label for="carbs-{{ i }}">Carbs (g)</label>
+                  <input
+                    id="carbs-{{ i }}"
+                    type="number"
+                    formControlName="carbs"
+                    class="form-input"
+                    placeholder="0"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+
+                <div class="form-group macro-input">
+                  <label for="fat-{{ i }}">Fat (g)</label>
+                  <input
+                    id="fat-{{ i }}"
+                    type="number"
+                    formControlName="fat"
+                    class="form-input"
+                    placeholder="0"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Totals Summary -->
+    <div class="totals-section">
+      <h3 class="section-title">Meal Totals</h3>
+      <div class="totals-grid">
+        <div class="total-item">
+          <span class="total-label">Calories</span>
+          <span class="total-value">{{
+            totals().calories | number : "1.0-0"
+          }}</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Protein</span>
+          <span class="total-value"
+            >{{ totals().protein | number : "1.0-1" }}g</span
+          >
+        </div>
+        <div class="total-item">
+          <span class="total-label">Carbs</span>
+          <span class="total-value"
+            >{{ totals().carbs | number : "1.0-1" }}g</span
+          >
+        </div>
+        <div class="total-item">
+          <span class="total-label">Fat</span>
+          <span class="total-value"
+            >{{ totals().fat | number : "1.0-1" }}g</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <button
+        class="button button-secondary"
+        (click)="cancel()"
+        type="button"
+        [disabled]="saving"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="button button-primary"
+        (click)="save()"
+        type="button"
+        [disabled]="!hasChanges() || itemsForm.invalid || saving"
+      >
+        <span *ngIf="!saving">Save Changes</span>
+        <span *ngIf="saving">Saving...</span>
+      </button>
+    </div>
+  </div>
+</div>

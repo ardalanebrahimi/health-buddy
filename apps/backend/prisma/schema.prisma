@@ -55,6 +55,7 @@ model Meal {
   userId     String
   takenAt    DateTime?
   status     MealStatus @default(draft)
+  edited     Boolean    @default(false)
   totalsJson Json?
   notes      String?
   createdAt  DateTime   @default(now())

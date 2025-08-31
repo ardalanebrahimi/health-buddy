@@ -238,6 +238,86 @@ export class NutritionService {
     }
   }
 
+  async updateItems(
+    mealId: string,
+    userId: string,
+    items: Array<{
+      id: string;
+      name: string;
+      portionGrams: number;
+      calories?: number;
+      protein?: number;
+      carbs?: number;
+      fat?: number;
+    }>
+  ): Promise<{
+    mealId: string;
+    status: string;
+    totals: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    };
+  }> {
+    // Verify meal exists and belongs to user
+    const meal = await this.prisma.meal.findFirst({
+      where: {
+        id: mealId,
+        userId,
+      },
+    });
+
+    if (!meal) {
+      throw new Error('MEAL_NOT_FOUND');
+    }
+
+    // Update items in transaction and calculate totals
+    const result = await this.prisma.$transaction(async (tx) => {
+      const totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+      // Update each item
+      for (const item of items) {
+        await tx.mealItem.update({
+          where: { id: item.id },
+          data: {
+            name: item.name,
+            portionGrams: item.portionGrams,
+            calories: item.calories,
+            protein: item.protein,
+            carbs: item.carbs,
+            fat: item.fat,
+            editedByUser: true,
+          },
+        });
+
+        // Add to totals
+        totals.calories += item.calories ?? 0;
+        totals.protein += item.protein ?? 0;
+        totals.carbs += item.carbs ?? 0;
+        totals.fat += item.fat ?? 0;
+      }
+
+      // Update meal: status=final, edited=true, totalsJson
+      await tx.meal.update({
+        where: { id: mealId },
+        data: {
+          status: MealStatus.final,
+          edited: true,
+          totalsJson: totals,
+        },
+      });
+
+      return totals;
+    });
+
+    return {
+      mealId,
+      status: 'final',
+      totals: result,
+    };
+  }
+
   private validateFile(file: FileUpload): void {
     // Check file size (8MB limit)
     const maxSize = 8 * 1024 * 1024; // 8MB

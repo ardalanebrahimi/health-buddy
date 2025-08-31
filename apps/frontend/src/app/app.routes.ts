@@ -87,6 +87,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "nutrition/edit/:mealId",
+    loadComponent: () =>
+      import("./nutrition/edit-meal/meal-edit.component").then(
+        (m) => m.MealEditComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {

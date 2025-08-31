@@ -30,13 +30,13 @@ export interface Meal {
 export interface FoodItem {
   id: string;
   name: string;
-  quantity: number;
-  unit: string;
+  portionGrams: number;
   calories: number;
-  proteinGrams: number;
-  carbsGrams: number;
-  fatGrams: number;
+  protein: number;
+  carbs: number;
+  fat: number;
   confidence?: number;
+  editedByUser?: boolean;
 }
 
 export interface MealRecognitionResponse {
@@ -46,6 +46,33 @@ export interface MealRecognitionResponse {
   confidence: number;
   totalCalories: number;
   message?: string;
+}
+
+export interface UpdateMealItemRequest {
+  id: string;
+  name: string;
+  portionGrams: number;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+}
+
+export interface UpdateMealItemsRequest {
+  items: UpdateMealItemRequest[];
+}
+
+export interface MealTotals {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface UpdateMealItemsResponse {
+  mealId: string;
+  status: string;
+  totals: MealTotals;
 }
 
 export interface ApiError {
@@ -96,6 +123,18 @@ export class MealApiService {
       .post<MealRecognitionResponse>(
         `${this.baseUrl}/meals/${mealId}/recognize`,
         {}
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  updateMealItems(
+    mealId: string,
+    request: UpdateMealItemsRequest
+  ): Observable<UpdateMealItemsResponse> {
+    return this.http
+      .patch<UpdateMealItemsResponse>(
+        `${this.baseUrl}/meals/${mealId}/items`,
+        request
       )
       .pipe(catchError(this.handleError));
   }

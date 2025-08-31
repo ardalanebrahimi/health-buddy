@@ -2,7 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import { NutritionService } from './nutrition.service';
-import { CreateMealPhotoDto, GetMealParamsDto } from './nutrition.dto';
+import {
+  CreateMealPhotoDto,
+  GetMealParamsDto,
+  UpdateMealItemsDto,
+} from './nutrition.dto';
 
 const prisma = new PrismaClient();
 const nutritionService = new NutritionService(prisma);
@@ -221,6 +225,66 @@ export const recognizeMeal = async (
         confidence: 0,
         totalCalories: 0,
         message: "Couldn't recognize meal, please edit manually.",
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  }
+};
+
+export const updateMealItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate parameters
+    const paramValidation = GetMealParamsDto.safeParse(req.params);
+    if (!paramValidation.success) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid meal ID',
+          details: paramValidation.error.errors,
+        },
+      });
+    }
+
+    // Validate request body
+    const bodyValidation = UpdateMealItemsDto.safeParse(req.body);
+    if (!bodyValidation.success) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid request data',
+          details: bodyValidation.error.errors,
+        },
+      });
+    }
+
+    // For now, use a hardcoded user ID (single-user mode)
+    const userId = 'default-user';
+    const { mealId } = paramValidation.data;
+    const { items } = bodyValidation.data;
+
+    const result = await nutritionService.updateItems(mealId, userId, items);
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('Error updating meal items:', error);
+
+    if (error.message === 'MEAL_NOT_FOUND') {
+      return res.status(404).json({
+        error: {
+          code: 'MEAL_NOT_FOUND',
+          message: 'Meal not found',
+        },
       });
     }
 
