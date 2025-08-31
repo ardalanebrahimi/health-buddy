@@ -30,3 +30,25 @@ export const UpdateMealItemsDto = z.object({
 });
 
 export type UpdateMealItemsRequest = z.infer<typeof UpdateMealItemsDto>;
+
+// NU-004: Manual meal entry DTOs
+export const CreateFoodItemDto = z.object({
+  name: z.string().min(1).max(200),
+  portionGrams: z.number().min(0),
+});
+
+export type CreateFoodItemRequest = z.infer<typeof CreateFoodItemDto>;
+
+export const CreateMealDto = z.object({
+  takenAt: z.string().datetime(),
+  items: z.array(CreateFoodItemDto).min(1),
+});
+
+export type CreateMealRequest = z.infer<typeof CreateMealDto>;
+
+export const FoodSearchDto = z.object({
+  q: z.string().min(1),
+  limit: z.number().min(1).max(50).optional(),
+});
+
+export type FoodSearchRequest = z.infer<typeof FoodSearchDto>;

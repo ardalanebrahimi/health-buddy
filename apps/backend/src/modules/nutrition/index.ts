@@ -4,9 +4,17 @@ import {
   getMealById,
   recognizeMeal,
   updateMealItems,
+  searchFoods,
+  createMeal,
 } from './nutrition.controller';
 
 const router: Router = Router();
+
+// GET /foods/search - Search for foods (NU-004)
+router.get('/foods/search', searchFoods);
+
+// POST /meals - Create manual meal (NU-004)
+router.post('/meals', createMeal);
 
 // POST /meals/photo - Upload meal photo
 router.post('/meals/photo', ...uploadMealPhoto);

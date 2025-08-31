@@ -4,24 +4,13 @@ import { Router, ActivatedRoute } from "@angular/router";
 import {
   MealApiService,
   MealRecognitionResponse,
+  FoodItem,
 } from "../../services/meal-api.service";
-
-interface RecognizedItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  calories: number;
-  proteinGrams: number;
-  carbsGrams: number;
-  fatGrams: number;
-  confidence: number;
-}
 
 interface RecognitionResponse {
   mealId: string;
   status: "completed" | "failed" | "processing";
-  recognizedItems: RecognizedItem[];
+  recognizedItems: FoodItem[];
   confidence: number;
   totalCalories: number;
   message?: string;
@@ -40,7 +29,7 @@ export class MealRecognitionComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   mealId: string = "";
-  items: RecognizedItem[] = [];
+  items: FoodItem[] = [];
   loading = true;
   error = "";
   totalCalories = 0;
@@ -62,9 +51,9 @@ export class MealRecognitionComponent implements OnInit {
 
   private async recognizeMeal() {
     try {
-      const response = (await this.mealApiService
+      const response = await this.mealApiService
         .recognizeMeal(this.mealId)
-        .toPromise()) as RecognitionResponse;
+        .toPromise();
 
       if (!response) {
         this.error = "No response from recognition service";

@@ -48,6 +48,37 @@ export interface MealRecognitionResponse {
   message?: string;
 }
 
+// NU-004: Additional interfaces for manual meal entry
+export interface FoodSearchItem {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  source: string;
+}
+
+export interface FoodSearchResponse {
+  foods: FoodSearchItem[];
+  total: number;
+}
+
+export interface CreateMealRequest {
+  takenAt: string;
+  items: { name: string; portionGrams: number }[];
+}
+
+export interface CreateMealResponse {
+  mealId: string;
+  status: 'final';
+  totals: {
+    totalCalories: number;
+    totalProteinGrams: number;
+    totalCarbsGrams: number;
+    totalFatGrams: number;
+  };
+}
+
 export interface UpdateMealItemRequest {
   id: string;
   name: string;
@@ -147,6 +178,25 @@ export class MealApiService {
     } catch (error) {
       throw new Error("Failed to convert image to blob");
     }
+  }
+
+  // NU-004: Search foods in nutrition database
+  async searchFoods(query: string, limit: number = 10): Promise<FoodSearchResponse> {
+    const url = `${environment.apiBaseUrl}/foods/search`;
+    const params = new URLSearchParams({ q: query, limit: limit.toString() });
+    
+    return this.http.get<FoodSearchResponse>(`${url}?${params}`)
+      .pipe(catchError(this.handleError))
+      .toPromise() as Promise<FoodSearchResponse>;
+  }
+
+  // NU-004: Create manual meal entry
+  async createManualMeal(mealData: CreateMealRequest): Promise<CreateMealResponse> {
+    const url = `${environment.apiBaseUrl}/meals`;
+    
+    return this.http.post<CreateMealResponse>(url, mealData)
+      .pipe(catchError(this.handleError))
+      .toPromise() as Promise<CreateMealResponse>;
   }
 
   private handleError = (error: HttpErrorResponse): Observable<never> => {

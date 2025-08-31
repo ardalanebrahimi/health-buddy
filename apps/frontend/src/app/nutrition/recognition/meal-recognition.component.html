@@ -80,7 +80,7 @@
         <div class="item-details">
           <div class="portion">
             <span class="label">Portion:</span>
-            <span class="value">{{ item.quantity }} {{ item.unit }}</span>
+            <span class="value">{{ item.portionGrams }}g</span>
           </div>
 
           <div class="macros">
@@ -90,15 +90,15 @@
             </div>
             <div class="macro">
               <span class="macro-label">Protein</span>
-              <span class="macro-value">{{ item.proteinGrams }}g</span>
+              <span class="macro-value">{{ item.protein }}g</span>
             </div>
             <div class="macro">
               <span class="macro-label">Carbs</span>
-              <span class="macro-value">{{ item.carbsGrams }}g</span>
+              <span class="macro-value">{{ item.carbs }}g</span>
             </div>
             <div class="macro">
               <span class="macro-label">Fat</span>
-              <span class="macro-value">{{ item.fatGrams }}g</span>
+              <span class="macro-value">{{ item.fat }}g</span>
             </div>
           </div>
         </div>

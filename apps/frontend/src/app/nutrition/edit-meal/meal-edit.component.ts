@@ -58,17 +58,23 @@ export class MealEditComponent implements OnInit {
   error = "";
 
   // Reactive form
-  itemsForm = new FormArray<
-    FormGroup<{
-      id: FormControl<string>;
-      name: FormControl<string>;
-      portionGrams: FormControl<number>;
-      calories: FormControl<number>;
-      protein: FormControl<number>;
-      carbs: FormControl<number>;
-      fat: FormControl<number>;
-    }>
-  >([]);
+  mainForm = new FormGroup({
+    items: new FormArray<
+      FormGroup<{
+        id: FormControl<string>;
+        name: FormControl<string>;
+        portionGrams: FormControl<number>;
+        calories: FormControl<number>;
+        protein: FormControl<number>;
+        carbs: FormControl<number>;
+        fat: FormControl<number>;
+      }>
+    >([])
+  });
+
+  get itemsForm() {
+    return this.mainForm.get('items') as FormArray;
+  }
 
   // Computed totals from form values
   totals = computed(() => {

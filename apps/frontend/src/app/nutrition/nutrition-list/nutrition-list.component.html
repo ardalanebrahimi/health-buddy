@@ -8,9 +8,19 @@
           Sync Now
         </button>
       </div>
-      <button class="add-meal-btn" (click)="addMeal()">+ Add Meal</button>
+      <button class="add-meal-btn" (click)="toggleAddOptions()">+ Add Meal</button>
     </div>
   </header>
+
+  <!-- Add Meal Options Dropdown -->
+  <div class="add-options" *ngIf="showAddOptions">
+    <button class="add-option" (click)="addMealWithPhoto()">
+      📷 Take Photo
+    </button>
+    <button class="add-option" (click)="addMealManually()">
+      ✏️ Manual Entry
+    </button>
+  </div>
 
   <!-- Loading State -->
   <div class="loading" *ngIf="isLoading">
@@ -22,10 +32,15 @@
   <div class="empty-state" *ngIf="!isLoading && meals.length === 0">
     <div class="empty-icon">🍽️</div>
     <h2>No meals yet</h2>
-    <p>Start tracking your nutrition by adding your first meal photo</p>
-    <button class="add-first-meal-btn" (click)="addMeal()">
-      Add Your First Meal
-    </button>
+    <p>Start tracking your nutrition by adding your first meal</p>
+    <div class="empty-state-actions">
+      <button class="add-first-meal-btn" (click)="addMealWithPhoto()">
+        📷 Take Photo
+      </button>
+      <button class="add-first-meal-btn secondary" (click)="addMealManually()">
+        ✏️ Manual Entry
+      </button>
+    </div>
   </div>
 
   <!-- Meals List -->

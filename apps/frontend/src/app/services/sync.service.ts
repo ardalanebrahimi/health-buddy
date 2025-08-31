@@ -193,6 +193,31 @@ export class SyncService {
     });
   }
 
+  // NU-004: Enqueue manual meal creation for offline sync
+  async enqueueMealCreate(mealData: { takenAt: string; items: { name: string; portionGrams: number }[] }): Promise<void> {
+    // Create a local meal record
+    const localMeal: LocalMeal = {
+      photoPath: '', // No photo for manual meals
+      takenAt: mealData.takenAt,
+      notes: `Manual meal: ${mealData.items.length} items`,
+      status: 'pending_sync',
+      createdAt: new Date().toISOString(),
+      syncAttempts: 0,
+    };
+
+    const id = await localDb.meals.add(localMeal);
+
+    // Add to sync queue
+    await this.enqueueSync({
+      method: "POST",
+      path: "/meals",
+      body: {
+        localMealId: id,
+        ...mealData,
+      },
+    });
+  }
+
   private async syncMealPhoto(body: any): Promise<void> {
     const { localMealId, photoPath, takenAt, notes } = body;
 

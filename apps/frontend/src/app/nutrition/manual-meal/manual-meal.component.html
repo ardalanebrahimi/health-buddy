@@ -1,0 +1,186 @@
+<div class="manual-meal-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Manual Meal Entry</h1>
+    <button type="button" class="cancel-btn" (click)="cancel()">Cancel</button>
+  </div>
+
+  <!-- Food Search Section -->
+  <div class="search-section">
+    <h2>Add Food Items</h2>
+    
+    <form [formGroup]="searchForm" class="search-form">
+      <!-- Food Search Input -->
+      <div class="search-input-container">
+        <label for="food-search">Search for food:</label>
+        <div class="input-with-clear">
+          <input
+            id="food-search"
+            type="text"
+            formControlName="query"
+            placeholder="e.g., chicken breast, rice, oatmeal"
+            class="search-input"
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="clear-btn"
+            (click)="clearSearch()"
+            *ngIf="searchForm.get('query')?.value"
+          >
+            ×
+          </button>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div class="search-status" *ngIf="isSearching()">
+          <span class="loading">Searching...</span>
+        </div>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div class="search-results" *ngIf="showSearchResults && searchResults().length > 0">
+        <div
+          class="search-result-item"
+          *ngFor="let food of searchResults()"
+          (click)="selectFood(food)"
+        >
+          <div class="food-name">{{ food.name }}</div>
+          <div class="food-nutrition">
+            {{ food.calories }} cal, {{ food.protein }}g protein per 100g
+            <span class="food-source">({{ food.source }})</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portion Input -->
+      <div class="portion-section" *ngIf="searchForm.get('selectedFood')?.value">
+        <label for="portion">Portion size (grams):</label>
+        <input
+          id="portion"
+          type="number"
+          formControlName="portionGrams"
+          min="1"
+          class="portion-input"
+        />
+        
+        <!-- Nutrition Preview -->
+        <div class="nutrition-preview" *ngIf="searchForm.get('selectedFood')?.value as selectedFood">
+          <div class="preview-title" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
+            Nutrition for {{ portionGrams }}g:
+          </div>
+          <div class="macro-row" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
+            <span>{{ calculateCalories(selectedFood, portionGrams) }} calories</span>
+            <span>{{ calculateProtein(selectedFood, portionGrams) }}g protein</span>
+          </div>
+          <div class="macro-row" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
+            <span>{{ calculateCarbs(selectedFood, portionGrams) }}g carbs</span>
+            <span>{{ calculateFat(selectedFood, portionGrams) }}g fat</span>
+          </div>
+        </div>
+
+        <!-- Add Item Button -->
+        <button
+          type="button"
+          class="add-item-btn"
+          (click)="addItem()"
+          [disabled]="!canAddItem()"
+        >
+          Add to Meal
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Current Items Section -->
+  <div class="items-section" *ngIf="items().length > 0">
+    <h2>Meal Items ({{ itemsCount }})</h2>
+    
+    <div class="item-list">
+      <div class="meal-item" *ngFor="let item of items(); let i = index">
+        <div class="item-info">
+          <div class="item-name">{{ item.name }}</div>
+          <div class="item-details">
+            <input
+              type="number"
+              [value]="item.portionGrams"
+              (input)="onPortionChange(i, $event)"
+              min="1"
+              class="portion-input-small"
+            />g
+            <span class="item-nutrition">
+              {{ item.macros.calories }} cal, 
+              {{ item.macros.protein }}g protein, 
+              {{ item.macros.carbs }}g carbs, 
+              {{ item.macros.fat }}g fat
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="remove-btn"
+          (click)="removeItem(i)"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+
+    <!-- Meal Totals -->
+    <div class="meal-totals">
+      <h3>Meal Totals</h3>
+      <div class="totals-grid">
+        <div class="total-item">
+          <span class="total-label">Calories:</span>
+          <span class="total-value">{{ totalMacros.calories }}</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Protein:</span>
+          <span class="total-value">{{ totalMacros.protein }}g</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Carbs:</span>
+          <span class="total-value">{{ totalMacros.carbs }}g</span>
+        </div>
+        <div class="total-item">
+          <span class="total-label">Fat:</span>
+          <span class="total-value">{{ totalMacros.fat }}g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="items().length === 0">
+    <div class="empty-icon">🍽️</div>
+    <p>No food items added yet.</p>
+    <p>Search for foods above to start building your meal.</p>
+  </div>
+
+  <!-- Messages -->
+  <div class="message success-message" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+  
+  <div class="message error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Offline Status -->
+  <div class="offline-banner" *ngIf="!isOnline()">
+    📱 You're offline. Meals will be saved locally and synced when online.
+  </div>
+
+  <!-- Save Button -->
+  <div class="save-section">
+    <button
+      type="button"
+      class="save-btn"
+      (click)="saveMeal()"
+      [disabled]="!canSave"
+    >
+      <span *ngIf="!isSaving()">Save Meal ({{ itemsCount }} items)</span>
+      <span *ngIf="isSaving()" class="loading">Saving...</span>
+    </button>
+  </div>
+</div>

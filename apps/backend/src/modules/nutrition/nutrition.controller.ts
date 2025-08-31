@@ -6,6 +6,8 @@ import {
   CreateMealPhotoDto,
   GetMealParamsDto,
   UpdateMealItemsDto,
+  CreateMealDto,
+  FoodSearchDto,
 } from './nutrition.dto';
 
 const prisma = new PrismaClient();
@@ -289,6 +291,83 @@ export const updateMealItems = async (
     }
 
     // Generic server error
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  }
+};
+
+// NU-004: Food search endpoint
+export const searchFoods = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate query parameters
+    const validation = FoodSearchDto.safeParse(req.query);
+    if (!validation.success) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid search parameters',
+          details: validation.error.errors,
+        },
+      });
+    }
+
+    const { q, limit = 10 } = validation.data;
+
+    const result = await nutritionService.searchFoods(q, limit);
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('Error searching foods:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  }
+};
+
+// NU-004: Manual meal creation endpoint
+export const createMeal = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Validate request body
+    const validation = CreateMealDto.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid request data',
+          details: validation.error.errors,
+        },
+      });
+    }
+
+    // For now, use a hardcoded user ID (single-user mode)
+    const userId = 'default-user';
+
+    const result = await nutritionService.createManualMeal({
+      ...validation.data,
+      userId,
+    });
+
+    // Log telemetry event
+    console.log(`manual_meal_created ${result.mealId} ${userId}`);
+
+    res.status(201).json(result);
+  } catch (error: any) {
+    console.error('Error creating manual meal:', error);
     res.status(500).json({
       error: {
         code: 'INTERNAL_ERROR',

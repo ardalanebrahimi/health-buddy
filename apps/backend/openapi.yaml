@@ -177,6 +177,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /foods/search:
+    get:
+      tags:
+        - nutrition
+      summary: Search foods
+      description: Search for foods in the nutrition database
+      operationId: searchFoods
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query for food items
+          schema:
+            type: string
+            minLength: 1
+            example: 'chicken breast'
+        - name: limit
+          in: query
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Foods found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodSearchResponse'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /meals:
     get:
       tags:
@@ -223,7 +261,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Meal'
+                $ref: '#/components/schemas/CreateMealResponse'
         '400':
           description: Invalid input
           content:
@@ -955,6 +993,55 @@ components:
         - createdAt
         - updatedAt
 
+    CreateMealResponse:
+      type: object
+      properties:
+        mealId:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+          description: The ID of the created meal
+        status:
+          type: string
+          enum: [final]
+          example: final
+          description: Status of the meal (always final for manual entries)
+        totals:
+          $ref: '#/components/schemas/MealTotals'
+      required:
+        - mealId
+        - status
+        - totals
+
+    MealTotals:
+      type: object
+      properties:
+        totalCalories:
+          type: number
+          minimum: 0
+          example: 450
+          description: Total calories for the meal
+        totalProteinGrams:
+          type: number
+          minimum: 0
+          example: 35
+          description: Total protein in grams
+        totalCarbsGrams:
+          type: number
+          minimum: 0
+          example: 15
+          description: Total carbohydrates in grams
+        totalFatGrams:
+          type: number
+          minimum: 0
+          example: 20
+          description: Total fat in grams
+      required:
+        - totalCalories
+        - totalProteinGrams
+        - totalCarbsGrams
+        - totalFatGrams
+
     FoodItem:
       type: object
       properties:
@@ -1009,25 +1096,20 @@ components:
     CreateMealRequest:
       type: object
       properties:
-        name:
-          type: string
-          example: Grilled Chicken Salad
-        type:
-          type: string
-          enum: [breakfast, lunch, dinner, snack]
-          example: lunch
         takenAt:
           type: string
           format: date-time
           example: '2025-08-30T12:30:00Z'
+          description: When the meal was taken (ISO datetime)
         items:
           type: array
           items:
             $ref: '#/components/schemas/CreateFoodItemRequest'
+          minItems: 1
+          description: List of food items in the meal
       required:
-        - name
-        - type
         - takenAt
+        - items
 
     CreateFoodItemRequest:
       type: object
@@ -1035,31 +1117,15 @@ components:
         name:
           type: string
           example: Grilled Chicken Breast
-        quantity:
+          description: Name of the food item
+        portionGrams:
           type: number
           minimum: 0
           example: 150
-        unit:
-          type: string
-          example: grams
-        calories:
-          type: number
-          minimum: 0
-          example: 165
-        proteinGrams:
-          type: number
-          minimum: 0
-          example: 31
-        carbsGrams:
-          type: number
-          minimum: 0
-          example: 0
-        fatGrams:
-          type: number
-          minimum: 0
-          example: 3.6
+          description: Portion size in grams
       required:
         - name
+        - portionGrams
         - quantity
         - unit
         - calories
@@ -1140,6 +1206,60 @@ components:
         - recognizedItems
         - confidence
         - status
+
+    FoodSearchResponse:
+      type: object
+      properties:
+        foods:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodSearchItem'
+        total:
+          type: integer
+          minimum: 0
+          example: 25
+          description: Total number of matching foods found
+      required:
+        - foods
+        - total
+
+    FoodSearchItem:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Chicken breast, skinless, boneless
+          description: Food item name
+        calories:
+          type: number
+          minimum: 0
+          example: 165
+          description: Calories per 100g
+        protein:
+          type: number
+          minimum: 0
+          example: 31
+          description: Protein per 100g in grams
+        carbs:
+          type: number
+          minimum: 0
+          example: 0
+          description: Carbohydrates per 100g in grams
+        fat:
+          type: number
+          minimum: 0
+          example: 3.6
+          description: Fat per 100g in grams
+        source:
+          type: string
+          example: USDA
+          description: Data source (e.g., USDA, FatSecret)
+      required:
+        - name
+        - calories
+        - protein
+        - carbs
+        - fat
 
     NutritionSummary:
       type: object
@@ -1549,31 +1669,6 @@ components:
             $ref: '#/components/schemas/UpdateMealItemDto'
       required:
         - items
-
-    MealTotals:
-      type: object
-      properties:
-        calories:
-          type: number
-          minimum: 0
-          example: 650
-        protein:
-          type: number
-          minimum: 0
-          example: 45
-        carbs:
-          type: number
-          minimum: 0
-          example: 55
-        fat:
-          type: number
-          minimum: 0
-          example: 22
-      required:
-        - calories
-        - protein
-        - carbs
-        - fat
 
     UpdateMealItemsResponse:
       type: object

@@ -27,11 +27,11 @@
   <!-- Main Content -->
   <div class="content" *ngIf="!loading && !error">
     <!-- Items List -->
-    <form [formGroup]="itemsForm" class="items-form">
+    <form [formGroup]="mainForm" class="items-form">
       <div class="items-section">
         <h2 class="section-title">Food Items</h2>
 
-        <div class="items-list" [formArrayName]="'itemsForm'">
+        <div class="items-list" formArrayName="items">
           <div
             class="item-card"
             *ngFor="let itemControl of itemsForm.controls; let i = index"

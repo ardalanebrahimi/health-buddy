@@ -18,6 +18,22 @@ interface FileUpload {
   size: number;
 }
 
+// NU-004: Manual meal creation interfaces
+interface CreateMealData {
+  takenAt: string;
+  items: { name: string; portionGrams: number }[];
+  userId: string;
+}
+
+interface FoodSearchItem {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  source: string;
+}
+
 export class NutritionService {
   private aiVisionService: MockAIVisionService;
 
@@ -404,5 +420,210 @@ export class NutritionService {
     if (hour >= 11 && hour < 16) return 'lunch';
     if (hour >= 16 && hour < 22) return 'dinner';
     return 'snack';
+  }
+
+  // NU-004: Search foods in nutrition database
+  async searchFoods(
+    query: string,
+    limit: number = 10
+  ): Promise<{ foods: FoodSearchItem[]; total: number }> {
+    // For now, return mock data (in production, this would call USDA/FatSecret API)
+    const mockFoods: FoodSearchItem[] = [
+      {
+        name: 'Chicken breast, skinless, boneless',
+        calories: 165,
+        protein: 31,
+        carbs: 0,
+        fat: 3.6,
+        source: 'USDA',
+      },
+      {
+        name: 'Rice, white, long-grain, cooked',
+        calories: 130,
+        protein: 2.7,
+        carbs: 28,
+        fat: 0.3,
+        source: 'USDA',
+      },
+      {
+        name: 'Broccoli, raw',
+        calories: 34,
+        protein: 2.8,
+        carbs: 7,
+        fat: 0.4,
+        source: 'USDA',
+      },
+      {
+        name: 'Oatmeal, cooked with water',
+        calories: 68,
+        protein: 2.4,
+        carbs: 12,
+        fat: 1.4,
+        source: 'USDA',
+      },
+      {
+        name: 'Greek yogurt, plain, low-fat',
+        calories: 59,
+        protein: 10,
+        carbs: 3.6,
+        fat: 0.4,
+        source: 'USDA',
+      },
+    ];
+
+    // Filter based on query
+    const filtered = mockFoods.filter((food) =>
+      food.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return {
+      foods: filtered.slice(0, limit),
+      total: filtered.length,
+    };
+  }
+
+  // NU-004: Create manual meal entry
+  async createManualMeal(data: CreateMealData): Promise<{
+    mealId: string;
+    status: MealStatus;
+    totals: {
+      totalCalories: number;
+      totalProteinGrams: number;
+      totalCarbsGrams: number;
+      totalFatGrams: number;
+    };
+  }> {
+    // Calculate nutrition for each item by looking up food data
+    const itemsWithNutrition = await Promise.all(
+      data.items.map(async (item) => {
+        const foodData = await this.lookupFoodNutrition(item.name);
+        
+        // Calculate nutrition based on portion
+        const portionFactor = item.portionGrams / 100; // nutrition is per 100g
+        
+        return {
+          id: uuidv4(),
+          name: item.name,
+          portionGrams: item.portionGrams,
+          calories: Math.round(foodData.calories * portionFactor),
+          protein: Math.round(foodData.protein * portionFactor * 10) / 10,
+          carbs: Math.round(foodData.carbs * portionFactor * 10) / 10,
+          fat: Math.round(foodData.fat * portionFactor * 10) / 10,
+          confidence: null,
+          editedByUser: false,
+        };
+      })
+    );
+
+    // Calculate totals
+    const totals = {
+      totalCalories: itemsWithNutrition.reduce(
+        (sum, item) => sum + item.calories,
+        0
+      ),
+      totalProteinGrams: itemsWithNutrition.reduce(
+        (sum, item) => sum + item.protein,
+        0
+      ),
+      totalCarbsGrams: itemsWithNutrition.reduce(
+        (sum, item) => sum + item.carbs,
+        0
+      ),
+      totalFatGrams: itemsWithNutrition.reduce(
+        (sum, item) => sum + item.fat,
+        0
+      ),
+    };
+
+    // Create meal and items in database
+    const meal = await this.prisma.meal.create({
+      data: {
+        id: uuidv4(),
+        userId: data.userId,
+        takenAt: new Date(data.takenAt),
+        status: MealStatus.final,
+        totalsJson: totals,
+        items: {
+          create: itemsWithNutrition,
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    return {
+      mealId: meal.id,
+      status: meal.status,
+      totals,
+    };
+  }
+
+  // Helper method to look up food nutrition data
+  private async lookupFoodNutrition(
+    foodName: string
+  ): Promise<{ calories: number; protein: number; carbs: number; fat: number }> {
+    // For now, use the same mock data as search
+    // In production, this would call a nutrition API or local database
+    const mockFoods = [
+      {
+        name: 'chicken breast',
+        calories: 165,
+        protein: 31,
+        carbs: 0,
+        fat: 3.6,
+      },
+      {
+        name: 'rice',
+        calories: 130,
+        protein: 2.7,
+        carbs: 28,
+        fat: 0.3,
+      },
+      {
+        name: 'broccoli',
+        calories: 34,
+        protein: 2.8,
+        carbs: 7,
+        fat: 0.4,
+      },
+      {
+        name: 'oatmeal',
+        calories: 68,
+        protein: 2.4,
+        carbs: 12,
+        fat: 1.4,
+      },
+      {
+        name: 'greek yogurt',
+        calories: 59,
+        protein: 10,
+        carbs: 3.6,
+        fat: 0.4,
+      },
+    ];
+
+    // Find best match
+    const lowerFoodName = foodName.toLowerCase();
+    const bestMatch = mockFoods.find((food) =>
+      lowerFoodName.includes(food.name)
+    );
+
+    // Default fallback if no match found
+    if (!bestMatch) {
+      return {
+        calories: 100,
+        protein: 5,
+        carbs: 10,
+        fat: 3,
+      };
+    }
+
+    return {
+      calories: bestMatch.calories,
+      protein: bestMatch.protein,
+      carbs: bestMatch.carbs,
+      fat: bestMatch.fat,
+    };
   }
 }

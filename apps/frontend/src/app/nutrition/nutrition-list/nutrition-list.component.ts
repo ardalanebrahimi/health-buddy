@@ -16,6 +16,7 @@ export class NutritionListComponent implements OnInit {
   isLoading = true;
   pendingSyncCount = 0;
   isOnline = navigator.onLine;
+  showAddOptions = false;
 
   constructor(private syncService: SyncService, private router: Router) {}
 
@@ -73,6 +74,23 @@ export class NutritionListComponent implements OnInit {
 
   addMeal() {
     this.router.navigate(["/nutrition/add-meal"]);
+  }
+
+  // NU-004: Toggle add meal options dropdown
+  toggleAddOptions() {
+    this.showAddOptions = !this.showAddOptions;
+  }
+
+  // Navigate to photo meal entry
+  addMealWithPhoto() {
+    this.showAddOptions = false;
+    this.router.navigate(["/nutrition/add-meal"]);
+  }
+
+  // NU-004: Navigate to manual meal entry
+  addMealManually() {
+    this.showAddOptions = false;
+    this.router.navigate(["/nutrition/manual-meal"]);
   }
 
   async forceSyncAll() {

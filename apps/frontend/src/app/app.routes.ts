@@ -80,6 +80,14 @@ export const routes: Routes = [
     canMatch: [lockGuard, profileCompleteGuard],
   },
   {
+    path: "nutrition/manual-meal",
+    loadComponent: () =>
+      import("./nutrition/manual-meal/manual-meal.component").then(
+        (m) => m.ManualMealComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
+  {
     path: "nutrition/recognition/:mealId",
     loadComponent: () =>
       import("./nutrition/recognition/meal-recognition.component").then(
