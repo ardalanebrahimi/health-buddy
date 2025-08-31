@@ -70,7 +70,7 @@ export interface CreateMealRequest {
 
 export interface CreateMealResponse {
   mealId: string;
-  status: 'final';
+  status: "final";
   totals: {
     totalCalories: number;
     totalProteinGrams: number;
@@ -181,20 +181,27 @@ export class MealApiService {
   }
 
   // NU-004: Search foods in nutrition database
-  async searchFoods(query: string, limit: number = 10): Promise<FoodSearchResponse> {
+  async searchFoods(
+    query: string,
+    limit: number = 10
+  ): Promise<FoodSearchResponse> {
     const url = `${environment.apiBaseUrl}/foods/search`;
     const params = new URLSearchParams({ q: query, limit: limit.toString() });
-    
-    return this.http.get<FoodSearchResponse>(`${url}?${params}`)
+
+    return this.http
+      .get<FoodSearchResponse>(`${url}?${params}`)
       .pipe(catchError(this.handleError))
       .toPromise() as Promise<FoodSearchResponse>;
   }
 
   // NU-004: Create manual meal entry
-  async createManualMeal(mealData: CreateMealRequest): Promise<CreateMealResponse> {
+  async createManualMeal(
+    mealData: CreateMealRequest
+  ): Promise<CreateMealResponse> {
     const url = `${environment.apiBaseUrl}/meals`;
-    
-    return this.http.post<CreateMealResponse>(url, mealData)
+
+    return this.http
+      .post<CreateMealResponse>(url, mealData)
       .pipe(catchError(this.handleError))
       .toPromise() as Promise<CreateMealResponse>;
   }

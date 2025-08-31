@@ -1,12 +1,22 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
-import { of, BehaviorSubject } from 'rxjs';
+import { Component, OnInit, signal } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import {
+  ReactiveFormsModule,
+  FormControl,
+  FormGroup,
+  Validators,
+} from "@angular/forms";
+import { Router } from "@angular/router";
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  tap,
+} from "rxjs/operators";
+import { of, BehaviorSubject } from "rxjs";
 
-import { MealApiService } from '../../services/meal-api.service';
-import { SyncService } from '../../services/sync.service';
+import { MealApiService } from "../../services/meal-api.service";
+import { SyncService } from "../../services/sync.service";
 
 export interface FoodSearchItem {
   name: string;
@@ -29,16 +39,16 @@ export interface MealItem {
 }
 
 @Component({
-  selector: 'app-manual-meal',
+  selector: "app-manual-meal",
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './manual-meal.component.html',
-  styleUrls: ['./manual-meal.component.scss']
+  templateUrl: "./manual-meal.component.html",
+  styleUrls: ["./manual-meal.component.scss"],
 })
 export class ManualMealComponent implements OnInit {
   // Expose Math for template use
   Math = Math;
-  
+
   // Signals for reactive state
   items = signal<MealItem[]>([]);
   searchResults = signal<FoodSearchItem[]>([]);
@@ -48,15 +58,18 @@ export class ManualMealComponent implements OnInit {
 
   // Form controls
   searchForm = new FormGroup({
-    query: new FormControl('', [Validators.required, Validators.minLength(1)]),
+    query: new FormControl("", [Validators.required, Validators.minLength(1)]),
     selectedFood: new FormControl<FoodSearchItem | null>(null),
-    portionGrams: new FormControl(100, [Validators.required, Validators.min(1)])
+    portionGrams: new FormControl(100, [
+      Validators.required,
+      Validators.min(1),
+    ]),
   });
 
   // State
   showSearchResults = false;
-  errorMessage = '';
-  successMessage = '';
+  errorMessage = "";
+  successMessage = "";
 
   constructor(
     private mealApiService: MealApiService,
@@ -71,30 +84,31 @@ export class ManualMealComponent implements OnInit {
 
   // Helper methods for template calculations
   calculateCalories(food: FoodSearchItem, grams: number): number {
-    return Math.round(food.calories * grams / 100);
+    return Math.round((food.calories * grams) / 100);
   }
 
   calculateProtein(food: FoodSearchItem, grams: number): number {
-    return Math.round(food.protein * grams / 100 * 10) / 10;
+    return Math.round(((food.protein * grams) / 100) * 10) / 10;
   }
 
   calculateCarbs(food: FoodSearchItem, grams: number): number {
-    return Math.round(food.carbs * grams / 100 * 10) / 10;
+    return Math.round(((food.carbs * grams) / 100) * 10) / 10;
   }
 
   calculateFat(food: FoodSearchItem, grams: number): number {
-    return Math.round(food.fat * grams / 100 * 10) / 10;
+    return Math.round(((food.fat * grams) / 100) * 10) / 10;
   }
 
   private setupNetworkListener() {
-    window.addEventListener('online', () => this.isOnline.set(true));
-    window.addEventListener('offline', () => this.isOnline.set(false));
+    window.addEventListener("online", () => this.isOnline.set(true));
+    window.addEventListener("offline", () => this.isOnline.set(false));
   }
 
   private setupSearchListener() {
     // Set up typeahead search
-    this.searchForm.get('query')?.valueChanges
-      .pipe(
+    this.searchForm
+      .get("query")
+      ?.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
         tap(() => {
@@ -116,16 +130,17 @@ export class ManualMealComponent implements OnInit {
           this.isSearching.set(false);
         },
         error: (error) => {
-          console.error('Search error:', error);
+          console.error("Search error:", error);
           this.searchResults.set([]);
           this.showSearchResults = false;
           this.isSearching.set(false);
           if (!this.isOnline()) {
-            this.errorMessage = 'Search is not available offline. Please connect to search for foods.';
+            this.errorMessage =
+              "Search is not available offline. Please connect to search for foods.";
           } else {
-            this.errorMessage = 'Error searching for foods. Please try again.';
+            this.errorMessage = "Error searching for foods. Please try again.";
           }
-        }
+        },
       });
   }
 
@@ -134,7 +149,7 @@ export class ManualMealComponent implements OnInit {
       const result = await this.mealApiService.searchFoods(query, 5);
       return result.foods;
     } catch (error) {
-      console.error('Food search failed:', error);
+      console.error("Food search failed:", error);
       throw error;
     }
   }
@@ -142,18 +157,19 @@ export class ManualMealComponent implements OnInit {
   selectFood(food: FoodSearchItem) {
     this.searchForm.patchValue({
       selectedFood: food,
-      query: food.name
+      query: food.name,
     });
     this.showSearchResults = false;
     this.clearMessages();
   }
 
   addItem() {
-    const selectedFood = this.searchForm.get('selectedFood')?.value;
-    const portionGrams = this.searchForm.get('portionGrams')?.value;
+    const selectedFood = this.searchForm.get("selectedFood")?.value;
+    const portionGrams = this.searchForm.get("portionGrams")?.value;
 
     if (!selectedFood || !portionGrams) {
-      this.errorMessage = 'Please search for a food item and enter a portion size.';
+      this.errorMessage =
+        "Please search for a food item and enter a portion size.";
       return;
     }
 
@@ -169,17 +185,17 @@ export class ManualMealComponent implements OnInit {
     const newItem: MealItem = {
       name: selectedFood.name,
       portionGrams,
-      macros
+      macros,
     };
 
     // Add to items list
-    this.items.update(currentItems => [...currentItems, newItem]);
+    this.items.update((currentItems) => [...currentItems, newItem]);
 
     // Reset form
     this.searchForm.reset({
-      query: '',
+      query: "",
       selectedFood: null,
-      portionGrams: 100
+      portionGrams: 100,
     });
     this.showSearchResults = false;
     this.clearMessages();
@@ -187,14 +203,16 @@ export class ManualMealComponent implements OnInit {
   }
 
   removeItem(index: number) {
-    this.items.update(currentItems => currentItems.filter((_, i) => i !== index));
+    this.items.update((currentItems) =>
+      currentItems.filter((_, i) => i !== index)
+    );
     this.clearMessages();
   }
 
   updateItemPortion(index: number, newPortion: number) {
     if (newPortion <= 0) return;
 
-    this.items.update(currentItems => {
+    this.items.update((currentItems) => {
       const updatedItems = [...currentItems];
       const item = updatedItems[index];
       const originalPortion = item.portionGrams;
@@ -209,7 +227,7 @@ export class ManualMealComponent implements OnInit {
           protein: Math.round(item.macros.protein * factor * 10) / 10,
           carbs: Math.round(item.macros.carbs * factor * 10) / 10,
           fat: Math.round(item.macros.fat * factor * 10) / 10,
-        }
+        },
       };
 
       return updatedItems;
@@ -220,9 +238,17 @@ export class ManualMealComponent implements OnInit {
     const items = this.items();
     return {
       calories: items.reduce((sum, item) => sum + item.macros.calories, 0),
-      protein: Math.round(items.reduce((sum, item) => sum + item.macros.protein, 0) * 10) / 10,
-      carbs: Math.round(items.reduce((sum, item) => sum + item.macros.carbs, 0) * 10) / 10,
-      fat: Math.round(items.reduce((sum, item) => sum + item.macros.fat, 0) * 10) / 10,
+      protein:
+        Math.round(
+          items.reduce((sum, item) => sum + item.macros.protein, 0) * 10
+        ) / 10,
+      carbs:
+        Math.round(
+          items.reduce((sum, item) => sum + item.macros.carbs, 0) * 10
+        ) / 10,
+      fat:
+        Math.round(items.reduce((sum, item) => sum + item.macros.fat, 0) * 10) /
+        10,
     };
   }
 
@@ -231,7 +257,10 @@ export class ManualMealComponent implements OnInit {
   }
 
   canAddItem(): boolean {
-    return !!(this.searchForm.get('selectedFood')?.value && this.searchForm.get('portionGrams')?.value);
+    return !!(
+      this.searchForm.get("selectedFood")?.value &&
+      this.searchForm.get("portionGrams")?.value
+    );
   }
 
   onPortionChange(index: number, event: Event): void {
@@ -255,50 +284,50 @@ export class ManualMealComponent implements OnInit {
     try {
       const mealData = {
         takenAt: new Date().toISOString(),
-        items: this.items().map(item => ({
+        items: this.items().map((item) => ({
           name: item.name,
-          portionGrams: item.portionGrams
-        }))
+          portionGrams: item.portionGrams,
+        })),
       };
 
       if (this.isOnline()) {
         // Save directly to server
         await this.mealApiService.createManualMeal(mealData);
-        this.successMessage = 'Meal saved successfully!';
-        
+        this.successMessage = "Meal saved successfully!";
+
         // Navigate to nutrition summary after short delay
         setTimeout(() => {
-          this.router.navigateByUrl('/nutrition');
+          this.router.navigateByUrl("/nutrition");
         }, 1500);
       } else {
         // Save to sync service for offline
         await this.syncService.enqueueMealCreate(mealData);
-        this.successMessage = 'Meal saved offline. Will sync when online.';
-        
+        this.successMessage = "Meal saved offline. Will sync when online.";
+
         setTimeout(() => {
-          this.router.navigateByUrl('/nutrition');
+          this.router.navigateByUrl("/nutrition");
         }, 1500);
       }
     } catch (error) {
-      console.error('Error saving meal:', error);
-      this.errorMessage = 'Failed to save meal. Please try again.';
+      console.error("Error saving meal:", error);
+      this.errorMessage = "Failed to save meal. Please try again.";
     } finally {
       this.isSaving.set(false);
     }
   }
 
   private clearMessages() {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage = "";
+    this.successMessage = "";
   }
 
   clearSearch() {
-    this.searchForm.patchValue({ query: '' });
+    this.searchForm.patchValue({ query: "" });
     this.showSearchResults = false;
     this.searchResults.set([]);
   }
 
   cancel() {
-    this.router.navigateByUrl('/nutrition');
+    this.router.navigateByUrl("/nutrition");
   }
 }

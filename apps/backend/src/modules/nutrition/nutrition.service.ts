@@ -497,10 +497,10 @@ export class NutritionService {
     const itemsWithNutrition = await Promise.all(
       data.items.map(async (item) => {
         const foodData = await this.lookupFoodNutrition(item.name);
-        
+
         // Calculate nutrition based on portion
         const portionFactor = item.portionGrams / 100; // nutrition is per 100g
-        
+
         return {
           id: uuidv4(),
           name: item.name,
@@ -562,7 +562,12 @@ export class NutritionService {
   // Helper method to look up food nutrition data
   private async lookupFoodNutrition(
     foodName: string
-  ): Promise<{ calories: number; protein: number; carbs: number; fat: number }> {
+  ): Promise<{
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }> {
     // For now, use the same mock data as search
     // In production, this would call a nutrition API or local database
     const mockFoods = [

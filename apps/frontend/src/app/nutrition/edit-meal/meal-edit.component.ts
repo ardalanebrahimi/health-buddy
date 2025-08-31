@@ -69,11 +69,11 @@ export class MealEditComponent implements OnInit {
         carbs: FormControl<number>;
         fat: FormControl<number>;
       }>
-    >([])
+    >([]),
   });
 
   get itemsForm() {
-    return this.mainForm.get('items') as FormArray;
+    return this.mainForm.get("items") as FormArray;
   }
 
   // Computed totals from form values

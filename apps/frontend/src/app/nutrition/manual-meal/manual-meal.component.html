@@ -8,7 +8,7 @@
   <!-- Food Search Section -->
   <div class="search-section">
     <h2>Add Food Items</h2>
-    
+
     <form [formGroup]="searchForm" class="search-form">
       <!-- Food Search Input -->
       <div class="search-input-container">
@@ -31,7 +31,7 @@
             ×
           </button>
         </div>
-        
+
         <!-- Loading indicator -->
         <div class="search-status" *ngIf="isSearching()">
           <span class="loading">Searching...</span>
@@ -39,7 +39,10 @@
       </div>
 
       <!-- Search Results Dropdown -->
-      <div class="search-results" *ngIf="showSearchResults && searchResults().length > 0">
+      <div
+        class="search-results"
+        *ngIf="showSearchResults && searchResults().length > 0"
+      >
         <div
           class="search-result-item"
           *ngFor="let food of searchResults()"
@@ -54,7 +57,10 @@
       </div>
 
       <!-- Portion Input -->
-      <div class="portion-section" *ngIf="searchForm.get('selectedFood')?.value">
+      <div
+        class="portion-section"
+        *ngIf="searchForm.get('selectedFood')?.value"
+      >
         <label for="portion">Portion size (grams):</label>
         <input
           id="portion"
@@ -63,17 +69,36 @@
           min="1"
           class="portion-input"
         />
-        
+
         <!-- Nutrition Preview -->
-        <div class="nutrition-preview" *ngIf="searchForm.get('selectedFood')?.value as selectedFood">
-          <div class="preview-title" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
+        <div
+          class="nutrition-preview"
+          *ngIf="searchForm.get('selectedFood')?.value as selectedFood"
+        >
+          <div
+            class="preview-title"
+            *ngIf="searchForm.get('portionGrams')?.value as portionGrams"
+          >
             Nutrition for {{ portionGrams }}g:
           </div>
-          <div class="macro-row" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
-            <span>{{ calculateCalories(selectedFood, portionGrams) }} calories</span>
-            <span>{{ calculateProtein(selectedFood, portionGrams) }}g protein</span>
+          <div
+            class="macro-row"
+            *ngIf="searchForm.get('portionGrams')?.value as portionGrams"
+          >
+            <span
+              >{{
+                calculateCalories(selectedFood, portionGrams)
+              }}
+              calories</span
+            >
+            <span
+              >{{ calculateProtein(selectedFood, portionGrams) }}g protein</span
+            >
           </div>
-          <div class="macro-row" *ngIf="searchForm.get('portionGrams')?.value as portionGrams">
+          <div
+            class="macro-row"
+            *ngIf="searchForm.get('portionGrams')?.value as portionGrams"
+          >
             <span>{{ calculateCarbs(selectedFood, portionGrams) }}g carbs</span>
             <span>{{ calculateFat(selectedFood, portionGrams) }}g fat</span>
           </div>
@@ -95,7 +120,7 @@
   <!-- Current Items Section -->
   <div class="items-section" *ngIf="items().length > 0">
     <h2>Meal Items ({{ itemsCount }})</h2>
-    
+
     <div class="item-list">
       <div class="meal-item" *ngFor="let item of items(); let i = index">
         <div class="item-info">
@@ -109,18 +134,13 @@
               class="portion-input-small"
             />g
             <span class="item-nutrition">
-              {{ item.macros.calories }} cal, 
-              {{ item.macros.protein }}g protein, 
-              {{ item.macros.carbs }}g carbs, 
-              {{ item.macros.fat }}g fat
+              {{ item.macros.calories }} cal, {{ item.macros.protein }}g
+              protein, {{ item.macros.carbs }}g carbs, {{ item.macros.fat }}g
+              fat
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          class="remove-btn"
-          (click)="removeItem(i)"
-        >
+        <button type="button" class="remove-btn" (click)="removeItem(i)">
           Remove
         </button>
       </div>
@@ -161,7 +181,7 @@
   <div class="message success-message" *ngIf="successMessage">
     {{ successMessage }}
   </div>
-  
+
   <div class="message error-message" *ngIf="errorMessage">
     {{ errorMessage }}
   </div>

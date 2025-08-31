@@ -106,9 +106,9 @@
       .loading {
         display: inline-flex;
         align-items: center;
-        
+
         &::after {
-          content: '';
+          content: "";
           width: 12px;
           height: 12px;
           margin-left: 8px;
@@ -428,7 +428,7 @@
     }
 
     .loading::after {
-      content: '';
+      content: "";
       width: 16px;
       height: 16px;
       margin-left: 8px;
@@ -442,8 +442,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // Responsive design
