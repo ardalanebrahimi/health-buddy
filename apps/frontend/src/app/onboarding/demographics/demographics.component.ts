@@ -111,10 +111,16 @@ export class DemographicsComponent implements OnInit {
         activityLevel: formValue.activityLevel!,
       };
 
+      const wasComplete = this.profileService.isProfileComplete();
       await this.profileService.saveProfile(dto);
 
-      // Navigate to baseline step (UP-002)
-      this.router.navigateByUrl("/onboarding/baseline");
+      // If profile was already complete, they're editing, so go back to home
+      // Otherwise, continue to baseline step
+      if (wasComplete) {
+        this.router.navigateByUrl("/");
+      } else {
+        this.router.navigateByUrl("/onboarding/baseline");
+      }
     } catch (error) {
       console.error("Failed to save profile:", error);
       // TODO: Show user-friendly error message
@@ -131,5 +137,9 @@ export class DemographicsComponent implements OnInit {
       if (field.errors["max"]) return `${fieldName} is too high`;
     }
     return null;
+  }
+
+  cancel() {
+    this.router.navigateByUrl("/");
   }
 }

@@ -3,9 +3,9 @@ export interface AuthState {
   pinSalt?: string; // base64 encoded salt
   biometricsEnabled?: boolean;
   lastUnlock?: string; // ISO string (UTC)
-  lockTimeoutMs?: number; // default 300000 (5 minutes)
+  lockTimeoutMs?: number; // default 86400000 (24 hours)
   version: 1;
 }
 
-export const DEFAULT_LOCK_TIMEOUT_MS = 300000; // 5 minutes
+export const DEFAULT_LOCK_TIMEOUT_MS = 86400000; // 24 hours
 export const PREFERENCES_KEY = "auth";

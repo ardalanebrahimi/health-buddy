@@ -88,8 +88,11 @@ export class GoalsComponent implements OnInit {
 
       await this.profile.saveGoals(dto);
 
-      // Navigate to dashboard (end of onboarding)
-      this.router.navigateByUrl("/dashboard");
+      // Mark onboarding as complete
+      await this.profile.markOnboardingComplete();
+
+      // Navigate to home (end of onboarding)
+      this.router.navigateByUrl("/");
     } catch (error) {
       console.error("Failed to save goals:", error);
       this.errorMessage = "Failed to save goals. Please try again.";

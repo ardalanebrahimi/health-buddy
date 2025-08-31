@@ -131,6 +131,14 @@
     <!-- Submit Button -->
     <div class="form-actions">
       <button
+        type="button"
+        class="btn-secondary"
+        (click)="cancel()"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+      <button
         type="submit"
         class="btn-primary"
         [disabled]="form.invalid || isLoading"

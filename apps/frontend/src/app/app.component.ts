@@ -62,37 +62,36 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private setupIdleDetection() {
-    // Track user activity
+    // Track user activity to keep session alive
     const activityEvents = [
       "mousedown",
       "mousemove",
       "keypress",
       "scroll",
       "touchstart",
+      "click",
     ];
 
-    const resetIdleTimer = () => {
-      this.lastActivity = Date.now();
+    const refreshSession = async () => {
+      try {
+        await this.lockService.refreshSession();
+      } catch (error) {
+        console.warn("Failed to refresh session:", error);
+      }
     };
 
     activityEvents.forEach((event) => {
-      document.addEventListener(event, resetIdleTimer, true);
+      document.addEventListener(event, refreshSession, true);
     });
 
-    // Check for idle timeout every 30 seconds
+    // Refresh session every 30 seconds to keep it alive
     this.idleTimer = window.setInterval(async () => {
-      const now = Date.now();
-      const idleTime = now - this.lastActivity;
-
-      // Check if we should lock due to inactivity
-      const state = await this.lockService.getState();
-      const timeoutMs = state.lockTimeoutMs || 300000; // 5 minutes default
-
-      if (idleTime > timeoutMs && state.pinHash) {
-        await this.lockService.forceLock();
-        await this.checkLockState();
+      try {
+        await this.lockService.refreshSession();
+      } catch (error) {
+        console.warn("Failed to refresh session:", error);
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000); // Refresh every 30 seconds
   }
 
   private async checkInitialLockState() {

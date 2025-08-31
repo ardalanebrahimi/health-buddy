@@ -260,6 +260,20 @@ export class LockService {
   }
 
   /**
+   * Refresh session to extend timeout
+   */
+  async refreshSession(): Promise<void> {
+    const state = await this.loadAuthState();
+
+    if (state.pinHash && state.lastUnlock) {
+      await this.saveAuthState({
+        ...state,
+        lastUnlock: new Date().toISOString(),
+      });
+    }
+  }
+
+  /**
    * Change PIN (requires current PIN verification)
    */
   async changePin(currentPin: string, newPin: string): Promise<boolean> {

@@ -7,6 +7,7 @@ import {
   LocalGoals,
 } from "../services/local-database.service";
 import { BehaviorSubject } from "rxjs";
+import { Preferences } from "@capacitor/preferences";
 
 export interface ProfileDto {
   id: string;
@@ -60,6 +61,8 @@ export class ProfileService {
 
   private readonly PROFILE_ID = "current";
   private readonly GOALS_ID = "current";
+  private readonly ONBOARDING_COMPLETE_KEY = "onboarding_complete";
+  private onboardingCompleteCache: boolean | null = null;
 
   constructor(
     private apiService: ApiService,
@@ -67,6 +70,12 @@ export class ProfileService {
   ) {
     this.loadLocalMirrors();
     this.setupSyncTriggers();
+    this.initializeOnboardingStatus();
+  }
+
+  private async initializeOnboardingStatus(): Promise<void> {
+    // Load onboarding status on service initialization
+    this.onboardingCompleteCache = await this.isOnboardingComplete();
   }
 
   private async loadLocalMirrors(): Promise<void> {
@@ -317,6 +326,50 @@ export class ProfileService {
       profile.weightKg > 0 &&
       !!profile.activityLevel
     );
+  }
+
+  async isOnboardingComplete(): Promise<boolean> {
+    // Use cache if available to avoid repeated async calls
+    if (this.onboardingCompleteCache !== null) {
+      return this.onboardingCompleteCache;
+    }
+
+    try {
+      const { value } = await Preferences.get({
+        key: this.ONBOARDING_COMPLETE_KEY,
+      });
+      const isComplete = value === "true";
+      this.onboardingCompleteCache = isComplete;
+      return isComplete;
+    } catch (error) {
+      console.warn("Failed to check onboarding completion status:", error);
+      this.onboardingCompleteCache = false;
+      return false;
+    }
+  }
+
+  async markOnboardingComplete(): Promise<void> {
+    try {
+      await Preferences.set({
+        key: this.ONBOARDING_COMPLETE_KEY,
+        value: "true",
+      });
+      this.onboardingCompleteCache = true; // Update cache
+      console.log("Onboarding marked as complete");
+    } catch (error) {
+      console.error("Failed to mark onboarding complete:", error);
+    }
+  }
+
+  // For testing/debugging - reset onboarding status
+  async resetOnboarding(): Promise<void> {
+    try {
+      await Preferences.remove({ key: this.ONBOARDING_COMPLETE_KEY });
+      this.onboardingCompleteCache = false;
+      console.log("Onboarding status reset");
+    } catch (error) {
+      console.error("Failed to reset onboarding:", error);
+    }
   }
 
   async getProfileSyncStatus(): Promise<boolean> {

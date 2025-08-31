@@ -7,11 +7,37 @@
 
 header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 2rem;
   gap: 1rem;
   position: relative;
+
+  .nav-section {
+    display: flex;
+    align-items: center;
+
+    .home-btn {
+      background: none;
+      border: none;
+      color: var(--primary-color, #3b82f6);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0.5rem 0;
+      transition: color 0.2s ease;
+      text-decoration: none;
+
+      &:hover {
+        color: var(--primary-hover, #2563eb);
+      }
+    }
+  }
+
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .hydration-section {

@@ -1,16 +1,21 @@
 <div class="nutrition-container">
   <header>
-    <h1>Nutrition</h1>
-    <div class="header-actions">
-      <div class="sync-status" *ngIf="pendingSyncCount > 0">
-        <span class="pending-badge">{{ pendingSyncCount }} pending sync</span>
-        <button class="sync-btn" (click)="forceSyncAll()" *ngIf="isOnline">
-          Sync Now
+    <div class="nav-section">
+      <a class="home-btn" routerLink="/" title="Back to Home"> ← Home </a>
+    </div>
+    <div class="header-main">
+      <h1>Nutrition</h1>
+      <div class="header-actions">
+        <div class="sync-status" *ngIf="pendingSyncCount > 0">
+          <span class="pending-badge">{{ pendingSyncCount }} pending sync</span>
+          <button class="sync-btn" (click)="forceSyncAll()" *ngIf="isOnline">
+            Sync Now
+          </button>
+        </div>
+        <button class="add-meal-btn" (click)="toggleAddOptions()">
+          + Add Meal
         </button>
       </div>
-      <button class="add-meal-btn" (click)="toggleAddOptions()">
-        + Add Meal
-      </button>
     </div>
   </header>
 
@@ -39,15 +44,9 @@
   <div class="empty-state" *ngIf="!isLoading && meals.length === 0">
     <div class="empty-icon">🍽️</div>
     <h2>No meals yet</h2>
-    <p>Start tracking your nutrition by adding your first meal</p>
-    <div class="empty-state-actions">
-      <button class="add-first-meal-btn" (click)="addMealWithPhoto()">
-        📷 Take Photo
-      </button>
-      <button class="add-first-meal-btn secondary" (click)="addMealManually()">
-        ✏️ Manual Entry
-      </button>
-    </div>
+    <p>
+      Start tracking your nutrition by clicking the "+ Add Meal" button above
+    </p>
   </div>
 
   <!-- Meals List -->

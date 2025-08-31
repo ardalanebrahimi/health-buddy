@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
+import { RouterLink } from "@angular/router";
 import { SyncService } from "../../services/sync.service";
 import { LocalMeal } from "../../services/local-database.service";
 import { HydrationComponent } from "../hydration/hydration.component";
@@ -8,7 +9,7 @@ import { HydrationComponent } from "../hydration/hydration.component";
 @Component({
   selector: "app-nutrition-list",
   standalone: true,
-  imports: [CommonModule, HydrationComponent],
+  imports: [CommonModule, RouterLink, HydrationComponent],
   templateUrl: "./nutrition-list.component.html",
   styleUrls: ["./nutrition-list.component.scss"],
 })
