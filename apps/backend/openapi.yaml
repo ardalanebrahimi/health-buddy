@@ -945,6 +945,98 @@ paths:
                 items:
                   $ref: '#/components/schemas/PainEntry'
 
+  /biometrics/mood:
+    post:
+      tags:
+        - biometrics
+      summary: Log mood entry
+      description: Record a mood measurement using emoji
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMoodRequest'
+      responses:
+        '201':
+          description: Mood entry logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntry'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/mood/latest:
+    get:
+      tags:
+        - biometrics
+      summary: Get latest mood entry
+      description: Retrieve the most recent mood measurement
+      responses:
+        '200':
+          description: Latest mood entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntry'
+        '404':
+          description: No mood entries found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/energy:
+    post:
+      tags:
+        - biometrics
+      summary: Log energy entry
+      description: Record an energy level measurement on a 1-10 scale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnergyRequest'
+      responses:
+        '201':
+          description: Energy entry logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnergyEntry'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/energy/latest:
+    get:
+      tags:
+        - biometrics
+      summary: Get latest energy entry
+      description: Retrieve the most recent energy measurement
+      responses:
+        '200':
+          description: Latest energy entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnergyEntry'
+        '404':
+          description: No energy entries found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /daily-summary:
     get:
       tags:
@@ -2090,6 +2182,88 @@ components:
       required:
         - location
         - score
+
+    CreateMoodRequest:
+      type: object
+      properties:
+        mood:
+          type: string
+          example: '🙂'
+          description: 'Emoji representing mood'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - mood
+
+    MoodEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        mood:
+          type: string
+          example: '🙂'
+          description: 'Emoji representing mood'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - id
+        - mood
+        - takenAt
+        - createdAt
+
+    CreateEnergyRequest:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+          description: 'Energy level on a scale of 1-10'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - score
+
+    EnergyEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+          description: 'Energy level on a scale of 1-10'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - id
+        - score
+        - takenAt
+        - createdAt
 
     DailySummary:
       type: object

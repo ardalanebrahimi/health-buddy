@@ -14,6 +14,10 @@ import {
   logPain,
   getLatestPain,
   getRecentPain,
+  logMood,
+  getLatestMood,
+  logEnergy,
+  getLatestEnergy,
 } from './biometrics.controller';
 
 const router: ExpressRouter = Router();
@@ -56,5 +60,17 @@ router.post('/pain', logPain);
 
 // GET /biometrics/pain/latest - Get latest pain entry
 router.get('/pain/latest', getLatestPain);
+
+// POST /biometrics/mood - Log mood
+router.post('/mood', logMood);
+
+// GET /biometrics/mood/latest - Get latest mood entry
+router.get('/mood/latest', getLatestMood);
+
+// POST /biometrics/energy - Log energy
+router.post('/energy', logEnergy);
+
+// GET /biometrics/energy/latest - Get latest energy entry
+router.get('/energy/latest', getLatestEnergy);
 
 export default router;

@@ -10,6 +10,10 @@ import {
   HREntry,
   CreatePainRequest,
   PainEntry,
+  CreateMoodRequest,
+  MoodEntry,
+  CreateEnergyRequest,
+  EnergyEntry,
 } from './biometrics.dto';
 
 export class BiometricsService {
@@ -352,5 +356,96 @@ export class BiometricsService {
       takenAt: result.takenAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
     }));
+  }
+
+  async logMood(
+    data: CreateMoodRequest & { userId: string }
+  ): Promise<MoodEntry> {
+    // Validate mood is in allowed set
+    const allowedMoods = ['😀', '🙂', '😐', '🙁', '😴', '😊', '🤗'];
+    if (!allowedMoods.includes(data.mood)) {
+      throw new Error(`Mood must be one of: ${allowedMoods.join(', ')}`);
+    }
+
+    const result = await this.prisma.biometricsMood.create({
+      data: {
+        userId: data.userId,
+        moodChar: data.mood,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+      },
+    });
+
+    // Log telemetry
+    console.log(`mood_logged ${data.mood} ${data.userId}`);
+
+    return {
+      id: result.id,
+      mood: result.moodChar,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getLatestMood(userId: string): Promise<MoodEntry | null> {
+    const result = await this.prisma.biometricsMood.findFirst({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      id: result.id,
+      mood: result.moodChar,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async logEnergy(
+    data: CreateEnergyRequest & { userId: string }
+  ): Promise<EnergyEntry> {
+    // Validate energy score range
+    if (data.score < 1 || data.score > 10) {
+      throw new Error('Energy score must be between 1 and 10');
+    }
+
+    const result = await this.prisma.biometricsEnergy.create({
+      data: {
+        userId: data.userId,
+        score: data.score,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+      },
+    });
+
+    // Log telemetry
+    console.log(`energy_logged ${data.score} ${data.userId}`);
+
+    return {
+      id: result.id,
+      score: result.score,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getLatestEnergy(userId: string): Promise<EnergyEntry | null> {
+    const result = await this.prisma.biometricsEnergy.findFirst({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      id: result.id,
+      score: result.score,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
   }
 }

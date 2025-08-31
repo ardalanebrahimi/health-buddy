@@ -65,3 +65,27 @@ export interface PainEntry {
   takenAt: string;
   createdAt: string;
 }
+
+export interface CreateMoodRequest {
+  mood: string;
+  takenAt?: string;
+}
+
+export interface MoodEntry {
+  id: string;
+  mood: string;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface CreateEnergyRequest {
+  score: number;
+  takenAt?: string;
+}
+
+export interface EnergyEntry {
+  id: string;
+  score: number;
+  takenAt: string;
+  createdAt: string;
+}

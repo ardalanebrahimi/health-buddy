@@ -127,6 +127,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "biometrics/mood-energy",
+    loadComponent: () =>
+      import("./biometrics/mood-energy/mood-energy-log.component").then(
+        (m) => m.MoodEnergyLogComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {

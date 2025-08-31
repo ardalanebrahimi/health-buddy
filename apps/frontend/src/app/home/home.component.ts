@@ -8,6 +8,8 @@ import {
   BPEntry,
   HREntry,
   PainEntry,
+  MoodEntry,
+  EnergyEntry,
 } from "../biometrics/biometrics.service";
 
 @Component({
@@ -28,6 +30,8 @@ export class HomeComponent implements OnInit {
   latestBP: BPEntry | null = null;
   latestHR: HREntry | null = null;
   latestPain: PainEntry | null = null;
+  latestMood: MoodEntry | null = null;
+  latestEnergy: EnergyEntry | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -39,6 +43,8 @@ export class HomeComponent implements OnInit {
     this.loadLatestBP();
     this.loadLatestHR();
     this.loadLatestPain();
+    this.loadLatestMood();
+    this.loadLatestEnergy();
   }
 
   async checkApiHealth() {
@@ -106,6 +112,22 @@ export class HomeComponent implements OnInit {
       this.latestPain = await this.biometricsService.getLatestPain();
     } catch (error) {
       console.error("Failed to load latest pain:", error);
+    }
+  }
+
+  async loadLatestMood() {
+    try {
+      this.latestMood = await this.biometricsService.getLatestMood();
+    } catch (error) {
+      console.error("Failed to load latest mood:", error);
+    }
+  }
+
+  async loadLatestEnergy() {
+    try {
+      this.latestEnergy = await this.biometricsService.getLatestEnergy();
+    } catch (error) {
+      console.error("Failed to load latest energy:", error);
     }
   }
 

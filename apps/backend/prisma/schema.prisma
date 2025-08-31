@@ -168,6 +168,28 @@ model BiometricsPain {
   @@map("biometrics_pain")
 }
 
+model BiometricsMood {
+  id        String   @id @default(uuid())
+  userId    String
+  moodChar  String   // store emoji character
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_mood")
+}
+
+model BiometricsEnergy {
+  id        String   @id @default(uuid())
+  userId    String
+  score     Int      // 1-10 scale
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_energy")
+}
+
 model CompanionMessage {
   id        String   @id @default(uuid())
   userId    String

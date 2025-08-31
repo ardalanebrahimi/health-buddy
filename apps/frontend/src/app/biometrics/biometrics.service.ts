@@ -70,6 +70,30 @@ export interface LogPainRequest {
   takenAt?: string;
 }
 
+export interface MoodEntry {
+  id: string;
+  mood: string;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface LogMoodRequest {
+  mood: string;
+  takenAt?: string;
+}
+
+export interface EnergyEntry {
+  id: string;
+  score: number;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface LogEnergyRequest {
+  score: number;
+  takenAt?: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -96,6 +120,14 @@ export class BiometricsService {
   private latestPainSubject = new BehaviorSubject<PainEntry | null>(null);
   public latestPain$ = this.latestPainSubject.asObservable();
 
+  // Local cache for latest mood
+  private latestMoodSubject = new BehaviorSubject<MoodEntry | null>(null);
+  public latestMood$ = this.latestMoodSubject.asObservable();
+
+  // Local cache for latest energy
+  private latestEnergySubject = new BehaviorSubject<EnergyEntry | null>(null);
+  public latestEnergy$ = this.latestEnergySubject.asObservable();
+
   constructor() {
     this.client = new HealthCompanionClient("http://localhost:3000/api/v1");
     // Load latest values on service initialization
@@ -104,6 +136,8 @@ export class BiometricsService {
     this.loadLatestBP();
     this.loadLatestHR();
     this.loadLatestPain();
+    this.loadLatestMood();
+    this.loadLatestEnergy();
   }
 
   async logWeight(valueKg: number, takenAt?: string): Promise<WeightEntry> {
@@ -380,5 +414,61 @@ export class BiometricsService {
 
   private async loadLatestPain(): Promise<void> {
     await this.getLatestPain();
+  }
+
+  // Mood methods
+  async logMood(data: LogMoodRequest): Promise<MoodEntry> {
+    try {
+      const result = await this.client.createMoodEntry(data);
+      // Update latest mood cache if this entry is more recent
+      await this.loadLatestMood();
+      return result;
+    } catch (error) {
+      console.error("Error logging mood:", error);
+      throw error;
+    }
+  }
+
+  async getLatestMood(): Promise<MoodEntry | null> {
+    try {
+      const result = await this.client.getLatestMood();
+      this.latestMoodSubject.next(result);
+      return result;
+    } catch (error) {
+      console.error("Error getting latest mood:", error);
+      return null;
+    }
+  }
+
+  private async loadLatestMood(): Promise<void> {
+    await this.getLatestMood();
+  }
+
+  // Energy methods
+  async logEnergy(data: LogEnergyRequest): Promise<EnergyEntry> {
+    try {
+      const result = await this.client.createEnergyEntry(data);
+      // Update latest energy cache if this entry is more recent
+      await this.loadLatestEnergy();
+      return result;
+    } catch (error) {
+      console.error("Error logging energy:", error);
+      throw error;
+    }
+  }
+
+  async getLatestEnergy(): Promise<EnergyEntry | null> {
+    try {
+      const result = await this.client.getLatestEnergy();
+      this.latestEnergySubject.next(result);
+      return result;
+    } catch (error) {
+      console.error("Error getting latest energy:", error);
+      return null;
+    }
+  }
+
+  private async loadLatestEnergy(): Promise<void> {
+    await this.getLatestEnergy();
   }
 }

@@ -7,6 +7,8 @@ import {
   CreateBPRequest,
   CreateHRRequest,
   CreatePainRequest,
+  CreateMoodRequest,
+  CreateEnergyRequest,
 } from './biometrics.dto';
 
 const prisma = new PrismaClient();
@@ -540,6 +542,159 @@ export const getRecentPain = async (
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to get recent pain entries',
+      },
+    });
+  }
+};
+
+export const logMood = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const data: CreateMoodRequest = req.body;
+
+    // Validate required fields
+    if (!data.mood) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_MOOD',
+          message: 'mood is required',
+        },
+      });
+    }
+
+    // Validate mood is in allowed set
+    const allowedMoods = ['😀', '🙂', '😐', '🙁', '😴', '😊', '🤗'];
+    if (!allowedMoods.includes(data.mood)) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_MOOD',
+          message: `Mood must be one of: ${allowedMoods.join(', ')}`,
+        },
+      });
+    }
+
+    const result = await biometricsService.logMood({
+      ...data,
+      userId,
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error logging mood:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to log mood',
+      },
+    });
+  }
+};
+
+export const getLatestMood = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const result = await biometricsService.getLatestMood(userId);
+
+    if (!result) {
+      return res.status(404).json({
+        error: {
+          code: 'NOT_FOUND',
+          message: 'No mood entries found',
+        },
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting latest mood:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to get latest mood entry',
+      },
+    });
+  }
+};
+
+export const logEnergy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const data: CreateEnergyRequest = req.body;
+
+    // Validate required fields
+    if (data.score === undefined || data.score === null) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_SCORE',
+          message: 'score is required',
+        },
+      });
+    }
+
+    // Validate energy score range
+    if (data.score < 1 || data.score > 10) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_SCORE',
+          message: 'Energy score must be between 1 and 10',
+        },
+      });
+    }
+
+    const result = await biometricsService.logEnergy({
+      ...data,
+      userId,
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error logging energy:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to log energy',
+      },
+    });
+  }
+};
+
+export const getLatestEnergy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const result = await biometricsService.getLatestEnergy(userId);
+
+    if (!result) {
+      return res.status(404).json({
+        error: {
+          code: 'NOT_FOUND',
+          message: 'No energy entries found',
+        },
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting latest energy:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to get latest energy entry',
       },
     });
   }
