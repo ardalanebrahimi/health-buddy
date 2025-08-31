@@ -120,6 +120,17 @@ model BiometricsWeight {
   @@map("biometrics_weight")
 }
 
+model BiometricsWaist {
+  id        String   @id @default(uuid())
+  userId    String
+  valueCm   Int
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_waist")
+}
+
 model CompanionMessage {
   id        String   @id @default(uuid())
   userId    String

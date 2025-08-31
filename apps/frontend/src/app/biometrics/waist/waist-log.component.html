@@ -1,0 +1,78 @@
+<div class="waist-log-container">
+  <div class="header">
+    <h2>Log Waist Circumference</h2>
+    <p class="hint">Log weekly for best results</p>
+  </div>
+
+  <!-- Latest Value Display -->
+  <div class="latest-value" *ngIf="latestWaist()">
+    <h3>Latest Measurement</h3>
+    <div class="value-display">
+      <span class="value">{{ latestWaist()?.valueCm }} cm</span>
+      <span class="date">{{
+        latestWaist()?.takenAt | date : "shortDate"
+      }}</span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="form" (ngSubmit)="save()" class="waist-form">
+    <div class="form-group">
+      <label for="valueCm">Waist Circumference (cm) *</label>
+      <input
+        id="valueCm"
+        type="number"
+        formControlName="valueCm"
+        placeholder="Enter waist circumference"
+        min="40"
+        max="200"
+        step="1"
+        class="form-control"
+        [class.is-invalid]="valueCmControl?.invalid && valueCmControl?.touched"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="valueCmControl?.invalid && valueCmControl?.touched"
+      >
+        <div *ngIf="valueCmControl?.errors?.['required']">
+          Waist circumference is required
+        </div>
+        <div *ngIf="valueCmControl?.errors?.['min']">
+          Must be at least 40 cm
+        </div>
+        <div *ngIf="valueCmControl?.errors?.['max']">
+          Must be no more than 200 cm
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="takenAt">Date & Time</label>
+      <input
+        id="takenAt"
+        type="datetime-local"
+        formControlName="takenAt"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="form.invalid || isLoading()"
+      >
+        <span *ngIf="isLoading()">Saving...</span>
+        <span *ngIf="!isLoading()">Save Measurement</span>
+      </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="successMessage()">
+      {{ successMessage() }}
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+  </form>
+</div>

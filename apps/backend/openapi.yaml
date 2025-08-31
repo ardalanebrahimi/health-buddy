@@ -657,6 +657,79 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /biometrics/waist:
+    get:
+      tags:
+        - biometrics
+      summary: Get waist circumference entries
+      description: Retrieve waist circumference measurements for a date range
+      parameters:
+        - name: startDate
+          in: query
+          description: Start date for waist entries (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-01'
+        - name: endDate
+          in: query
+          description: End date for waist entries (YYYY-MM-DD format)
+          schema:
+            type: string
+            format: date
+            example: '2025-08-30'
+      responses:
+        '200':
+          description: Waist circumference entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaistEntriesResponse'
+    post:
+      tags:
+        - biometrics
+      summary: Log waist circumference
+      description: Log a new waist circumference measurement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWaistRequest'
+      responses:
+        '201':
+          description: Waist circumference logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaistEntry'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/waist/latest:
+    get:
+      tags:
+        - biometrics
+      summary: Get latest waist circumference
+      description: Retrieve the most recent waist circumference measurement
+      responses:
+        '200':
+          description: Latest waist circumference retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaistEntry'
+        '404':
+          description: No waist circumference entries found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /daily-summary:
     get:
       tags:
@@ -1528,6 +1601,70 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WeightEntry'
+        total:
+          type: integer
+          minimum: 0
+          example: 10
+        startDate:
+          type: string
+          format: date
+          example: '2025-08-01'
+        endDate:
+          type: string
+          format: date
+          example: '2025-08-30'
+      required:
+        - entries
+        - total
+
+    WaistEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        valueCm:
+          type: integer
+          minimum: 40
+          maximum: 200
+          example: 85
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - id
+        - valueCm
+        - takenAt
+        - createdAt
+
+    CreateWaistRequest:
+      type: object
+      properties:
+        valueCm:
+          type: integer
+          minimum: 40
+          maximum: 200
+          example: 85
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T07:00:00Z'
+      required:
+        - valueCm
+
+    WaistEntriesResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaistEntry'
         total:
           type: integer
           minimum: 0

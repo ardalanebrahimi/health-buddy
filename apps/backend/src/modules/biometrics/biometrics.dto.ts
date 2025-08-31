@@ -9,3 +9,15 @@ export interface WeightEntry {
   takenAt: string;
   createdAt: string;
 }
+
+export interface CreateWaistRequest {
+  valueCm: number;
+  takenAt?: string;
+}
+
+export interface WaistEntry {
+  id: string;
+  valueCm: number;
+  takenAt: string;
+  createdAt: string;
+}
