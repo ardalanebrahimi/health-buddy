@@ -74,7 +74,7 @@ export function createApp() {
   v1Router.use('/auth', authRouter);
   v1Router.use('/', usersRouter); // Profile and goals endpoints
   v1Router.use('/', nutritionRouter); // Nutrition endpoints
-  v1Router.use('/', biometricsRouter); // Biometrics endpoints
+  v1Router.use('/biometrics', biometricsRouter); // Biometrics endpoints
   v1Router.use('/companion', companionRouter); // Companion endpoints
   v1Router.use('/', dashboardRouter); // Dashboard endpoints
   v1Router.use('/hydration', hydrationRouter);
