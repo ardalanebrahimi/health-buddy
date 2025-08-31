@@ -1,0 +1,78 @@
+<div class="weight-log-container">
+  <div class="header">
+    <h1>Log Weight</h1>
+    <button
+      type="button"
+      class="close-btn"
+      (click)="cancel()"
+      aria-label="Close"
+    >
+      ×
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="weight-form">
+    <div class="form-group">
+      <label for="valueKg">Weight (kg) *</label>
+      <input
+        id="valueKg"
+        type="number"
+        step="0.1"
+        min="20"
+        max="300"
+        formControlName="valueKg"
+        placeholder="Enter weight in kg"
+        [class.error]="valueKgControl?.invalid && valueKgControl?.touched"
+      />
+
+      @if (valueKgControl?.invalid && valueKgControl?.touched) {
+      <div class="error-messages">
+        @if (valueKgControl?.errors?.['required']) {
+        <span>Weight is required</span>
+        } @if (valueKgControl?.errors?.['min']) {
+        <span>Weight must be at least 20 kg</span>
+        } @if (valueKgControl?.errors?.['max']) {
+        <span>Weight must be at most 300 kg</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="takenAt">Date & Time</label>
+      <input
+        id="takenAt"
+        type="datetime-local"
+        formControlName="takenAt"
+        [class.error]="takenAtControl?.invalid && takenAtControl?.touched"
+      />
+    </div>
+
+    @if (error) {
+    <div class="error-alert">
+      {{ error }}
+    </div>
+    }
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="form.invalid || loading"
+      >
+        @if (loading) {
+        <span class="loading-spinner"></span>
+        Saving... } @else { Save Weight }
+      </button>
+    </div>
+  </form>
+</div>

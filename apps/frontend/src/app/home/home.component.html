@@ -35,10 +35,10 @@
         <span>Nutrition</span>
         <small>Track meals with photos</small>
       </button>
-      <button class="module-btn biometrics" disabled>
+      <button class="module-btn biometrics" routerLink="/biometrics/weight">
         <div class="icon">📊</div>
-        <span>Biometrics</span>
-        <small>Coming soon</small>
+        <span>Weight Log</span>
+        <small>Track daily weight</small>
       </button>
       <button class="module-btn dashboard" disabled>
         <div class="icon">📈</div>
@@ -51,6 +51,35 @@
         <small>Coming soon</small>
       </button>
     </div>
+  </div>
+
+  <!-- Latest Weight Display -->
+  <div class="weight-section" *ngIf="apiStatus === 'ok'">
+    <div class="section-header">
+      <h3>Latest Weight</h3>
+      <button class="quick-action-btn" routerLink="/biometrics/weight">
+        + Weight
+      </button>
+    </div>
+
+    <div class="weight-card" *ngIf="latestWeight; else noWeight">
+      <div class="weight-value">
+        <span class="value">{{ latestWeight.valueKg }}</span>
+        <span class="unit">kg</span>
+      </div>
+      <div class="weight-meta">
+        <span class="date">{{ latestWeight.takenAt | date : "short" }}</span>
+      </div>
+    </div>
+
+    <ng-template #noWeight>
+      <div class="no-weight-card">
+        <p>No weight entries yet</p>
+        <button class="btn-primary" routerLink="/biometrics/weight">
+          Log First Weight
+        </button>
+      </div>
+    </ng-template>
   </div>
 
   <div class="sdk-demo-section" *ngIf="apiStatus === 'ok'">

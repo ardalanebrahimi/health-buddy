@@ -103,6 +103,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "biometrics/weight",
+    loadComponent: () =>
+      import("./biometrics/weight/weight-log.component").then(
+        (m) => m.WeightLogComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {

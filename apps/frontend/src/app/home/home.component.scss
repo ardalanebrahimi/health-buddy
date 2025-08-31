@@ -241,3 +241,103 @@ button:disabled {
 button:hover:not(:disabled) {
   background-color: #0056b3;
 }
+
+// Weight section styles
+.weight-section {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    .quick-action-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background: #0056b3;
+      }
+    }
+  }
+}
+
+.weight-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+
+  .weight-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+
+    .value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .unit {
+      font-size: 1rem;
+      color: #666;
+    }
+  }
+
+  .weight-meta {
+    text-align: right;
+
+    .date {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.no-weight-card {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+
+  p {
+    margin: 0 0 1rem 0;
+    color: #666;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #0056b3;
+    }
+  }
+}

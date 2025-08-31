@@ -1487,48 +1487,39 @@ components:
           type: string
           format: uuid
           example: '123e4567-e89b-12d3-a456-426614174000'
-        weightKg:
+        valueKg:
           type: number
           minimum: 20
-          maximum: 500
+          maximum: 300
           example: 72.5
         takenAt:
           type: string
           format: date-time
           example: '2025-08-30T07:00:00Z'
-        notes:
-          type: string
-          maxLength: 500
-          example: Morning weight after workout
         createdAt:
           type: string
           format: date-time
           example: '2025-08-30T07:00:00Z'
       required:
         - id
-        - weightKg
+        - valueKg
         - takenAt
         - createdAt
 
     CreateWeightRequest:
       type: object
       properties:
-        weightKg:
+        valueKg:
           type: number
           minimum: 20
-          maximum: 500
+          maximum: 300
           example: 72.5
         takenAt:
           type: string
           format: date-time
           example: '2025-08-30T07:00:00Z'
-        notes:
-          type: string
-          maxLength: 500
-          example: Morning weight after workout
       required:
-        - weightKg
-        - takenAt
+        - valueKg
 
     WeightEntriesResponse:
       type: object

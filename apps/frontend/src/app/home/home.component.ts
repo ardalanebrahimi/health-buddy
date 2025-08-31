@@ -1,7 +1,11 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { ApiService } from "../services/api.service";
+import {
+  BiometricsService,
+  WeightEntry,
+} from "../biometrics/biometrics.service";
 
 @Component({
   selector: "app-home",
@@ -11,10 +15,13 @@ import { ApiService } from "../services/api.service";
   styleUrls: ["./home.component.scss"],
 })
 export class HomeComponent implements OnInit {
+  private biometricsService = inject(BiometricsService);
+
   apiStatus: "loading" | "ok" | "error" = "loading";
   apiStatusMessage = "Checking...";
   dailySummary: any = null;
   companionMessage: any = null;
+  latestWeight: WeightEntry | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -22,6 +29,7 @@ export class HomeComponent implements OnInit {
     this.checkApiHealth();
     this.loadDailySummary();
     this.loadCompanionMessage();
+    this.loadLatestWeight();
   }
 
   async checkApiHealth() {
@@ -57,6 +65,14 @@ export class HomeComponent implements OnInit {
       this.companionMessage = await this.apiService.getCompanionMessage();
     } catch (error) {
       console.error("Failed to load companion message:", error);
+    }
+  }
+
+  async loadLatestWeight() {
+    try {
+      this.latestWeight = await this.biometricsService.getLatestWeight();
+    } catch (error) {
+      console.error("Failed to load latest weight:", error);
     }
   }
 }
