@@ -18,6 +18,7 @@
 ## 🔧 Backend Implementation
 
 ### Database Model
+
 ```sql
 -- Existing table in Prisma schema
 model Hydration {
@@ -26,19 +27,21 @@ model Hydration {
   amountMl  Int
   takenAt   DateTime
   createdAt DateTime @default(now())
-  
+
   @@index([userId, takenAt])
   @@map("hydration")
 }
 ```
 
 ### API Endpoints
+
 - ✅ `POST /hydration` - Create hydration entry
 - ✅ `GET /hydration/summary?date=YYYY-MM-DD` - Get daily summary with total liters
 - ✅ `GET /hydration?date=YYYY-MM-DD` - Get hydration entries for date
 - ✅ `DELETE /hydration/:id` - Delete hydration entry (for undo)
 
 ### Service Layer
+
 - ✅ `HydrationService` with full CRUD operations
 - ✅ Proper date handling and timezone support
 - ✅ Validation with error handling
@@ -49,11 +52,13 @@ model Hydration {
 ## 🎨 Frontend Implementation
 
 ### Components
+
 - ✅ `HydrationComponent` - Main hydration UI with buttons and total display
 - ✅ Integrated into `NutritionListComponent` for easy access
 - ✅ Clean, mobile-first responsive design
 
 ### Features
+
 - ✅ Quick add buttons (+250ml, +500ml)
 - ✅ Real-time total liters display
 - ✅ Undo last entry functionality
@@ -62,6 +67,7 @@ model Hydration {
 - ✅ Clean, accessible UI design
 
 ### Service Layer
+
 - ✅ `HydrationService` for frontend API calls
 - ✅ Error handling and retry logic
 - ✅ Integration with existing `ApiService`
@@ -70,26 +76,28 @@ model Hydration {
 
 ## 📋 Acceptance Criteria Status
 
-| Criteria | Status | Notes |
-|----------|--------|-------|
-| One-tap quick add works (+250ml/+500ml) | ✅ | Blue buttons with hover effects |
-| Daily total updates instantly | ✅ | Optimistic updates + server refresh |
-| Undo removes last log | ✅ | DELETE endpoint with error handling |
-| Hydration included in nutrition summaries | ✅ | Integrated in nutrition list view |
-| Works offline with sync + pending state | 🔄 | Basic structure in place, full offline to be completed in CX-004 |
+| Criteria                                  | Status | Notes                                                            |
+| ----------------------------------------- | ------ | ---------------------------------------------------------------- |
+| One-tap quick add works (+250ml/+500ml)   | ✅     | Blue buttons with hover effects                                  |
+| Daily total updates instantly             | ✅     | Optimistic updates + server refresh                              |
+| Undo removes last log                     | ✅     | DELETE endpoint with error handling                              |
+| Hydration included in nutrition summaries | ✅     | Integrated in nutrition list view                                |
+| Works offline with sync + pending state   | 🔄     | Basic structure in place, full offline to be completed in CX-004 |
 
 ---
 
 ## 🗂️ Files Created/Modified
 
 ### Backend
+
 - `apps/backend/src/modules/hydration/hydration.service.ts` - Service layer
-- `apps/backend/src/modules/hydration/hydration.controller.ts` - Controllers  
+- `apps/backend/src/modules/hydration/hydration.controller.ts` - Controllers
 - `apps/backend/src/modules/hydration/hydration.dto.ts` - Validation DTOs
 - `apps/backend/src/modules/hydration/index.ts` - Router setup
 - `apps/backend/openapi.yaml` - Added `/hydration/summary` and `DELETE /hydration/:id` endpoints
 
 ### Frontend
+
 - `apps/frontend/src/app/nutrition/hydration/hydration.component.ts` - Main component
 - `apps/frontend/src/app/nutrition/hydration/hydration.component.html` - Template
 - `apps/frontend/src/app/nutrition/hydration/hydration.component.scss` - Styles
@@ -98,6 +106,7 @@ model Hydration {
 - `apps/frontend/src/app/nutrition/nutrition-list/nutrition-list.component.*` - Integration
 
 ### Testing
+
 - `test-hydration.js` - Comprehensive test suite for all endpoints
 
 ---
@@ -105,6 +114,7 @@ model Hydration {
 ## 🔄 API Examples
 
 ### Create Hydration Entry
+
 ```bash
 POST /api/v1/hydration
 {
@@ -114,12 +124,14 @@ POST /api/v1/hydration
 ```
 
 ### Get Daily Summary
+
 ```bash
 GET /api/v1/hydration/summary?date=2025-08-31
 # Response: { "date": "2025-08-31", "totalLiters": 1.25 }
 ```
 
 ### Delete Entry (Undo)
+
 ```bash
 DELETE /api/v1/hydration/550e8400-e29b-41d4-a716-446655440000
 # Response: 204 No Content
@@ -130,11 +142,13 @@ DELETE /api/v1/hydration/550e8400-e29b-41d4-a716-446655440000
 ## 🧪 Testing
 
 Run the test suite:
+
 ```bash
 node test-hydration.js
 ```
 
 Tests cover:
+
 - ✅ Basic CRUD operations
 - ✅ Summary calculation accuracy
 - ✅ Undo functionality
@@ -147,7 +161,7 @@ Tests cover:
 
 1. **User visits nutrition page** → sees hydration widget at top
 2. **Taps +250ml or +500ml** → instant UI update + API call
-3. **Views daily total** → shows current liters consumed  
+3. **Views daily total** → shows current liters consumed
 4. **Taps "Undo Last"** → removes most recent entry
 5. **Data syncs** → works offline with pending sync state
 

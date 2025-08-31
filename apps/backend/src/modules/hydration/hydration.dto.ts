@@ -31,11 +31,15 @@ export function validateCreateHydrationDto(body: any): CreateHydrationDto {
   return { amountMl, takenAt };
 }
 
-export function validateGetHydrationSummaryDto(query: any): GetHydrationSummaryDto {
+export function validateGetHydrationSummaryDto(
+  query: any
+): GetHydrationSummaryDto {
   const { date } = query;
 
   if (!date || typeof date !== 'string') {
-    throw new Error('date is required and must be a string in YYYY-MM-DD format');
+    throw new Error(
+      'date is required and must be a string in YYYY-MM-DD format'
+    );
   }
 
   // Validate date format (YYYY-MM-DD)
@@ -52,7 +56,9 @@ export function validateGetHydrationSummaryDto(query: any): GetHydrationSummaryD
   return { date };
 }
 
-export function validateGetHydrationEntriesDto(query: any): GetHydrationEntriesDto {
+export function validateGetHydrationEntriesDto(
+  query: any
+): GetHydrationEntriesDto {
   const { date } = query;
 
   if (date && typeof date !== 'string') {

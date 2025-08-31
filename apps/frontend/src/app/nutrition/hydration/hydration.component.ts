@@ -1,13 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HydrationService } from '../../services/hydration.service';
+import { Component, OnInit, signal } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { HydrationService } from "../../services/hydration.service";
 
 @Component({
-  selector: 'app-hydration',
+  selector: "app-hydration",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './hydration.component.html',
-  styleUrls: ['./hydration.component.scss'],
+  templateUrl: "./hydration.component.html",
+  styleUrls: ["./hydration.component.scss"],
 })
 export class HydrationComponent implements OnInit {
   totalLiters = signal(0);
@@ -27,7 +27,7 @@ export class HydrationComponent implements OnInit {
     try {
       // Optimistic update
       const previousTotal = this.totalLiters();
-      this.totalLiters.update(v => v + amountMl / 1000);
+      this.totalLiters.update((v) => v + amountMl / 1000);
 
       const entry = await this.hydrationService.addHydration(amountMl);
       this.lastEntryId.set(entry.id);
@@ -36,8 +36,8 @@ export class HydrationComponent implements OnInit {
       await this.refreshSummary();
     } catch (error) {
       // Rollback optimistic update on error
-      this.totalLiters.update(v => v - amountMl / 1000);
-      console.error('Failed to add hydration:', error);
+      this.totalLiters.update((v) => v - amountMl / 1000);
+      console.error("Failed to add hydration:", error);
       // TODO: Show toast notification
     } finally {
       this.isLoading.set(false);
@@ -46,11 +46,11 @@ export class HydrationComponent implements OnInit {
 
   async refreshSummary() {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       const summary = await this.hydrationService.getHydrationSummary(today);
       this.totalLiters.set(summary.totalLiters);
     } catch (error) {
-      console.error('Failed to refresh summary:', error);
+      console.error("Failed to refresh summary:", error);
       // TODO: Show toast notification
     }
   }
@@ -67,7 +67,7 @@ export class HydrationComponent implements OnInit {
         await this.refreshSummary();
       }
     } catch (error) {
-      console.error('Failed to undo hydration:', error);
+      console.error("Failed to undo hydration:", error);
       // TODO: Show toast notification
     } finally {
       this.isLoading.set(false);

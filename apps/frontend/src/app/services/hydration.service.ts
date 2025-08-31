@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
+import { Injectable } from "@angular/core";
+import { ApiService } from "./api.service";
 
 export interface HydrationEntry {
   id: string;
@@ -20,7 +20,7 @@ export interface CreateHydrationRequest {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class HydrationService {
   constructor(private apiService: ApiService) {}
@@ -33,7 +33,7 @@ export class HydrationService {
         takenAt,
       });
     } catch (error) {
-      console.error('Failed to add hydration:', error);
+      console.error("Failed to add hydration:", error);
       throw error;
     }
   }
@@ -42,7 +42,7 @@ export class HydrationService {
     try {
       return await this.apiService.getHydrationSummary(date);
     } catch (error) {
-      console.error('Failed to get hydration summary:', error);
+      console.error("Failed to get hydration summary:", error);
       throw error;
     }
   }
@@ -51,24 +51,24 @@ export class HydrationService {
     try {
       return await this.apiService.deleteHydration(id);
     } catch (error) {
-      console.error('Failed to delete hydration:', error);
+      console.error("Failed to delete hydration:", error);
       throw error;
     }
   }
 
   async getLastHydrationEntry(): Promise<HydrationEntry | null> {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       const response = await this.apiService.getHydration({ date: today });
-      
+
       if (response.entries && response.entries.length > 0) {
         // Return the most recent entry (they should be sorted by takenAt desc)
         return response.entries[0];
       }
-      
+
       return null;
     } catch (error) {
-      console.error('Failed to get last hydration entry:', error);
+      console.error("Failed to get last hydration entry:", error);
       throw error;
     }
   }

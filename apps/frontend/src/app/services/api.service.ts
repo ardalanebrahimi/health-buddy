@@ -123,7 +123,9 @@ export class ApiService {
   async getHydrationSummary(date: string) {
     try {
       // For now, make a direct HTTP call since the SDK might not have this method yet
-      const response = await this.client['client'].get(`/hydration/summary?date=${date}`);
+      const response = await this.client["client"].get(
+        `/hydration/summary?date=${date}`
+      );
       return response.data;
     } catch (error) {
       console.error("Failed to get hydration summary:", error);
@@ -134,7 +136,7 @@ export class ApiService {
   async deleteHydration(id: string) {
     try {
       // For now, make a direct HTTP call since the SDK might not have this method yet
-      const response = await this.client['client'].delete(`/hydration/${id}`);
+      const response = await this.client["client"].delete(`/hydration/${id}`);
       return response.data;
     } catch (error) {
       console.error("Failed to delete hydration:", error);

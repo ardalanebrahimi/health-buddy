@@ -23,10 +23,13 @@ export class HydrationService {
     });
   }
 
-  async getHydrationSummary(userId: string, date: string): Promise<HydrationSummary> {
+  async getHydrationSummary(
+    userId: string,
+    date: string
+  ): Promise<HydrationSummary> {
     const start = new Date(date);
     start.setUTCHours(0, 0, 0, 0);
-    
+
     const end = new Date(start);
     end.setUTCDate(start.getUTCDate() + 1);
 
@@ -58,7 +61,7 @@ export class HydrationService {
     if (date) {
       const start = new Date(date);
       start.setUTCHours(0, 0, 0, 0);
-      
+
       const end = new Date(start);
       end.setUTCDate(start.getUTCDate() + 1);
 
@@ -78,7 +81,7 @@ export class HydrationService {
     const totalMl = entries.reduce((sum, entry) => sum + entry.amountMl, 0);
 
     return {
-      entries: entries.map(entry => ({
+      entries: entries.map((entry) => ({
         id: entry.id,
         amountMl: entry.amountMl,
         type: 'water', // For now, all entries are water

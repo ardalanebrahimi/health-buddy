@@ -57,7 +57,10 @@ export const getHydrationSummary = async (
 
     const dto = validateGetHydrationSummaryDto(req.query);
 
-    const summary = await hydrationService.getHydrationSummary(userId, dto.date);
+    const summary = await hydrationService.getHydrationSummary(
+      userId,
+      dto.date
+    );
 
     res.json(summary);
   } catch (error) {
@@ -124,7 +127,10 @@ export const deleteHydration = async (
 
     res.status(204).send();
   } catch (error) {
-    if (error instanceof Error && error.message === 'Hydration entry not found') {
+    if (
+      error instanceof Error &&
+      error.message === 'Hydration entry not found'
+    ) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',

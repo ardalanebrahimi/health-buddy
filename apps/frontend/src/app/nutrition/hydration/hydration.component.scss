@@ -30,13 +30,13 @@
 .total-value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2196F3;
+  color: #2196f3;
 }
 
 .total-unit {
   font-size: 1.5rem;
   font-weight: 500;
-  color: #2196F3;
+  color: #2196f3;
 }
 
 .total-label {
@@ -60,7 +60,7 @@
   padding: 1rem 1.5rem;
   border: none;
   border-radius: 12px;
-  background: #2196F3;
+  background: #2196f3;
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -69,7 +69,7 @@
 }
 
 .hydration-btn:hover:not(:disabled) {
-  background: #1976D2;
+  background: #1976d2;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
@@ -116,8 +116,8 @@
 }
 
 .undo-btn:hover:not(:disabled) {
-  border-color: #2196F3;
-  color: #2196F3;
+  border-color: #2196f3;
+  color: #2196f3;
   background: #f5f5f5;
 }
 
@@ -148,14 +148,18 @@
   width: 16px;
   height: 16px;
   border: 2px solid #ddd;
-  border-top: 2px solid #2196F3;
+  border-top: 2px solid #2196f3;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive design */
@@ -164,20 +168,20 @@
     padding: 0.75rem;
     margin: 0 0.5rem;
   }
-  
+
   .hydration-buttons {
     gap: 0.75rem;
   }
-  
+
   .hydration-btn {
     padding: 0.875rem 1.25rem;
     min-width: 70px;
   }
-  
+
   .total-value {
     font-size: 2rem;
   }
-  
+
   .total-unit {
     font-size: 1.25rem;
   }

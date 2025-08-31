@@ -9,31 +9,34 @@
   </div>
 
   <div class="hydration-buttons">
-    <button 
-      class="hydration-btn quick-add-250" 
-      (click)="add(250)" 
+    <button
+      class="hydration-btn quick-add-250"
+      (click)="add(250)"
       [disabled]="isLoading()"
-      type="button">
+      type="button"
+    >
       <span class="btn-amount">+250</span>
       <span class="btn-unit">ml</span>
     </button>
-    
-    <button 
-      class="hydration-btn quick-add-500" 
-      (click)="add(500)" 
+
+    <button
+      class="hydration-btn quick-add-500"
+      (click)="add(500)"
       [disabled]="isLoading()"
-      type="button">
+      type="button"
+    >
       <span class="btn-amount">+500</span>
       <span class="btn-unit">ml</span>
     </button>
   </div>
 
   <div class="hydration-actions">
-    <button 
-      class="undo-btn" 
-      (click)="undo()" 
+    <button
+      class="undo-btn"
+      (click)="undo()"
       [disabled]="isLoading() || !lastEntryId()"
-      type="button">
+      type="button"
+    >
       <span class="undo-icon">↶</span>
       <span>Undo Last</span>
     </button>
