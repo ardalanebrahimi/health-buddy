@@ -40,10 +40,15 @@ export class AppComponent implements OnInit, OnDestroy {
         "appStateChange",
         async ({ isActive }) => {
           if (!isActive) {
-            // App going to background
-            await this.lockService.forceLock();
+            // App going to background - only force lock after a longer period
+            // Don't immediately lock on background to prevent frequent re-authentication
           } else {
-            // App coming to foreground
+            // App coming to foreground - refresh session instead of checking lock
+            try {
+              await this.lockService.refreshSession();
+            } catch (error) {
+              console.warn("Failed to refresh session on foreground:", error);
+            }
             await this.checkLockState();
           }
         }
@@ -53,8 +58,15 @@ export class AppComponent implements OnInit, OnDestroy {
     // Listen for browser visibility changes (web)
     this.visibilityListener = async () => {
       if (document.hidden) {
-        await this.lockService.forceLock();
+        // Don't immediately lock when tab becomes hidden
+        // The timeout-based locking will handle this more gracefully
       } else {
+        // Refresh session when tab becomes visible again
+        try {
+          await this.lockService.refreshSession();
+        } catch (error) {
+          console.warn("Failed to refresh session on visibility:", error);
+        }
         await this.checkLockState();
       }
     };

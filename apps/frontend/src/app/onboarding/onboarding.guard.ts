@@ -43,7 +43,16 @@ export const profileCompleteGuard: CanMatchFn = async (route, segments) => {
     return true;
   }
 
-  // If onboarding is not complete, redirect to demographics
+  // Check if profile exists and is complete
+  const isProfileComplete = profileService.isProfileComplete();
+
+  // If profile is complete but onboarding isn't marked complete, mark it as complete
+  if (isProfileComplete) {
+    await profileService.markOnboardingComplete();
+    return true;
+  }
+
+  // If neither complete, redirect to demographics
   router.navigateByUrl("/onboarding/demographics");
   return false;
 };

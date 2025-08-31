@@ -22,14 +22,7 @@ export const lockGuard: CanMatchFn = async (route, segments) => {
       return false;
     }
 
-    // Auto-refresh session when checking lock status
-    try {
-      await lockService.refreshSession();
-    } catch (error) {
-      console.warn("Failed to refresh session:", error);
-    }
-
-    // Check if app should be locked
+    // Check if app should be locked (don't auto-refresh here to avoid frequent refreshes)
     const shouldLock = await lockService.shouldLock();
 
     if (shouldLock) {

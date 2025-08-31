@@ -140,6 +140,15 @@ export class DemographicsComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigateByUrl("/");
+    // Check if profile was already complete before editing
+    const wasComplete = this.profileService.isProfileComplete();
+
+    if (wasComplete) {
+      // They were editing an existing profile, go back to home
+      this.router.navigateByUrl("/");
+    } else {
+      // They're in initial onboarding, still go back but show a message
+      this.router.navigateByUrl("/");
+    }
   }
 }
