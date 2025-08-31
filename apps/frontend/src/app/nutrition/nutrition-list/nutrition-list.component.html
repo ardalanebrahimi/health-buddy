@@ -15,6 +15,16 @@
         <button class="add-meal-btn" (click)="toggleAddOptions()">
           + Add Meal
         </button>
+
+        <!-- Add Meal Options Dropdown -->
+        <div class="add-options" *ngIf="showAddOptions">
+          <button class="add-option" (click)="addMealWithPhoto()">
+            📷 Take Photo
+          </button>
+          <button class="add-option" (click)="addMealManually()">
+            ✏️ Manual Entry
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -22,16 +32,6 @@
   <!-- Hydration Quick Log -->
   <div class="hydration-section">
     <app-hydration></app-hydration>
-  </div>
-
-  <!-- Add Meal Options Dropdown -->
-  <div class="add-options" *ngIf="showAddOptions">
-    <button class="add-option" (click)="addMealWithPhoto()">
-      📷 Take Photo
-    </button>
-    <button class="add-option" (click)="addMealManually()">
-      ✏️ Manual Entry
-    </button>
   </div>
 
   <!-- Loading State -->

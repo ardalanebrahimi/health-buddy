@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
 import { RouterLink } from "@angular/router";
@@ -81,6 +81,19 @@ export class NutritionListComponent implements OnInit {
   // NU-004: Toggle add meal options dropdown
   toggleAddOptions() {
     this.showAddOptions = !this.showAddOptions;
+  }
+
+  // Close dropdown when clicking outside
+  @HostListener("document:click", ["$event"])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const addMealBtn = target.closest(".add-meal-btn");
+    const addOptions = target.closest(".add-options");
+
+    // Close if clicking outside both the button and dropdown
+    if (!addMealBtn && !addOptions && this.showAddOptions) {
+      this.showAddOptions = false;
+    }
   }
 
   // Navigate to photo meal entry
