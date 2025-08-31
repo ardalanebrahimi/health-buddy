@@ -79,6 +79,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "nutrition/recognition/:mealId",
+    loadComponent: () =>
+      import("./nutrition/recognition/meal-recognition.component").then(
+        (m) => m.MealRecognitionComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {

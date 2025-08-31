@@ -160,3 +160,76 @@ export const getMealById = async (
     });
   }
 };
+
+export const recognizeMeal = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { mealId } = req.params;
+
+  console.log(`meal_recognition_started ${mealId}`);
+
+  try {
+    // Validate parameters
+    const validation = GetMealParamsDto.safeParse(req.params);
+    if (!validation.success) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid meal ID',
+          details: validation.error.errors,
+        },
+      });
+    }
+
+    // For now, use a hardcoded user ID (single-user mode)
+    const userId = 'default-user';
+
+    const result = await nutritionService.recognizeMeal(mealId, userId);
+
+    console.log(`meal_recognition_completed ${mealId}`);
+
+    res.json(result);
+  } catch (error: any) {
+    console.error(`meal_recognition_failed ${mealId}`, error);
+
+    if (error.message === 'MEAL_NOT_FOUND') {
+      return res.status(404).json({
+        error: {
+          code: 'MEAL_NOT_FOUND',
+          message: 'Meal not found',
+        },
+      });
+    }
+
+    if (error.message === 'PHOTO_NOT_FOUND') {
+      return res.status(422).json({
+        error: {
+          code: 'PHOTO_NOT_FOUND',
+          message: 'No photo found for this meal',
+        },
+      });
+    }
+
+    if (error.message === 'RECOGNITION_FAILED') {
+      // Return graceful fallback as per spec
+      return res.json({
+        mealId,
+        status: 'failed',
+        recognizedItems: [],
+        confidence: 0,
+        totalCalories: 0,
+        message: "Couldn't recognize meal, please edit manually.",
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  }
+};

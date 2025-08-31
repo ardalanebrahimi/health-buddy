@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
+import { MockAIVisionService } from './ai-vision.service';
 
 interface CreateMealPhotoData {
   takenAt?: string;
@@ -18,7 +19,11 @@ interface FileUpload {
 }
 
 export class NutritionService {
-  constructor(private prisma: PrismaClient) {}
+  private aiVisionService: MockAIVisionService;
+
+  constructor(private prisma: PrismaClient) {
+    this.aiVisionService = new MockAIVisionService();
+  }
 
   async createMealWithPhoto(
     file: FileUpload,
@@ -127,6 +132,110 @@ export class NutritionService {
       createdAt: meal.createdAt.toISOString(),
       updatedAt: meal.updatedAt.toISOString(),
     };
+  }
+
+  async recognizeMeal(mealId: string, userId: string) {
+    // First, verify the meal exists and belongs to the user
+    const meal = await this.prisma.meal.findFirst({
+      where: {
+        id: mealId,
+        userId,
+      },
+      include: {
+        photo: true,
+      },
+    });
+
+    if (!meal) {
+      throw new Error('MEAL_NOT_FOUND');
+    }
+
+    if (!meal.photo) {
+      throw new Error('PHOTO_NOT_FOUND');
+    }
+
+    try {
+      // Call AI vision service to analyze the photo
+      const aiResponse = await this.aiVisionService.analyzeFoodPhoto(
+        meal.photo.photoUrl
+      );
+
+      // If no items recognized, return fallback response
+      if (aiResponse.items.length === 0) {
+        return {
+          mealId,
+          status: 'failed',
+          recognizedItems: [],
+          confidence: 0,
+          totalCalories: 0,
+        };
+      }
+
+      // Save recognized items to database
+      const mealItems = await this.prisma.$transaction(async (tx) => {
+        // Delete any existing items for this meal
+        await tx.mealItem.deleteMany({
+          where: { mealId },
+        });
+
+        // Insert new recognized items
+        const items = await Promise.all(
+          aiResponse.items.map((item) =>
+            tx.mealItem.create({
+              data: {
+                id: uuidv4(),
+                mealId,
+                name: item.name,
+                portionGrams: item.portionGrams,
+                calories: item.calories,
+                protein: item.protein,
+                carbs: item.carbs,
+                fat: item.fat,
+                confidence: item.confidence,
+                editedByUser: false,
+              },
+            })
+          )
+        );
+
+        // Update meal status to recognized
+        await tx.meal.update({
+          where: { id: mealId },
+          data: { status: MealStatus.recognized },
+        });
+
+        return items;
+      });
+
+      // Transform to API response format
+      const recognizedItems = mealItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.portionGrams || 0,
+        unit: 'grams',
+        calories: item.calories || 0,
+        proteinGrams: item.protein || 0,
+        carbsGrams: item.carbs || 0,
+        fatGrams: item.fat || 0,
+        confidence: item.confidence || 0,
+      }));
+
+      const totalCalories = recognizedItems.reduce(
+        (sum, item) => sum + item.calories,
+        0
+      );
+
+      return {
+        mealId,
+        status: 'completed',
+        recognizedItems,
+        confidence: aiResponse.overallConfidence,
+        totalCalories,
+      };
+    } catch (error) {
+      console.error('AI vision service failed:', error);
+      throw new Error('RECOGNITION_FAILED');
+    }
   }
 
   private validateFile(file: FileUpload): void {

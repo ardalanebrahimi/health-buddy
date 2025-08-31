@@ -39,6 +39,15 @@ export interface FoodItem {
   confidence?: number;
 }
 
+export interface MealRecognitionResponse {
+  mealId: string;
+  status: "completed" | "failed" | "processing";
+  recognizedItems: FoodItem[];
+  confidence: number;
+  totalCalories: number;
+  message?: string;
+}
+
 export interface ApiError {
   error: {
     code: string;
@@ -79,6 +88,15 @@ export class MealApiService {
   getMealById(mealId: string): Observable<Meal> {
     return this.http
       .get<Meal>(`${this.baseUrl}/meals/${mealId}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  recognizeMeal(mealId: string): Observable<MealRecognitionResponse> {
+    return this.http
+      .post<MealRecognitionResponse>(
+        `${this.baseUrl}/meals/${mealId}/recognize`,
+        {}
+      )
       .pipe(catchError(this.handleError));
   }
 

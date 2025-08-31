@@ -158,7 +158,11 @@ export class MealPhotoComponent implements OnInit {
         if (response) {
           this.successMessage =
             "Meal saved successfully! Recognition coming next.";
-          setTimeout(() => this.router.navigate(["/nutrition"]), 2000);
+          setTimeout(
+            () =>
+              this.router.navigate(["/nutrition/recognition", response.mealId]),
+            2000
+          );
         }
       } else {
         // Save locally and queue for sync

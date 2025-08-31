@@ -1,0 +1,149 @@
+<div class="recognition-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-button" (click)="goBack()">
+      <span class="icon">←</span>
+    </button>
+    <h1>Food Recognition</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-section">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+    <p class="loading-text">Recognizing your meal...</p>
+    <p class="loading-subtext">This may take a few moments</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && error" class="error-section">
+    <div class="error-icon">
+      <span class="icon">⚠️</span>
+    </div>
+    <h2>Recognition Failed</h2>
+    <p class="error-message">{{ error }}</p>
+    <div class="error-actions">
+      <button class="retry-button" (click)="retryRecognition()">
+        <span class="icon">🔄</span>
+        Try Again
+      </button>
+      <button class="edit-button" (click)="editMeal()">
+        <span class="icon">✏️</span>
+        Edit Manually
+      </button>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="!loading && !error && items.length > 0" class="success-section">
+    <!-- Overall Summary -->
+    <div class="summary-card">
+      <h2>Recognized Items</h2>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-label">Total Calories</span>
+          <span class="stat-value">{{ totalCalories }} kcal</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Items Found</span>
+          <span class="stat-value">{{ items.length }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Confidence</span>
+          <span
+            class="stat-value confidence"
+            [class]="getConfidenceColor(overallConfidence)"
+          >
+            {{ getConfidencePercentage(overallConfidence) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recognized Items List -->
+    <div class="items-list">
+      <div *ngFor="let item of items" class="item-card">
+        <div class="item-header">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <div
+            class="confidence-badge"
+            [class]="getConfidenceColor(item.confidence || 0)"
+          >
+            <span class="confidence-icon">{{
+              getConfidenceIcon(item.confidence || 0)
+            }}</span>
+            <span>{{ getConfidencePercentage(item.confidence || 0) }}</span>
+          </div>
+        </div>
+
+        <div class="item-details">
+          <div class="portion">
+            <span class="label">Portion:</span>
+            <span class="value">{{ item.quantity }} {{ item.unit }}</span>
+          </div>
+
+          <div class="macros">
+            <div class="macro">
+              <span class="macro-label">Calories</span>
+              <span class="macro-value">{{ item.calories }} kcal</span>
+            </div>
+            <div class="macro">
+              <span class="macro-label">Protein</span>
+              <span class="macro-value">{{ item.proteinGrams }}g</span>
+            </div>
+            <div class="macro">
+              <span class="macro-label">Carbs</span>
+              <span class="macro-value">{{ item.carbsGrams }}g</span>
+            </div>
+            <div class="macro">
+              <span class="macro-label">Fat</span>
+              <span class="macro-value">{{ item.fatGrams }}g</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence Details (Collapsible) -->
+    <div class="confidence-section">
+      <button class="confidence-toggle" (click)="toggleConfidenceDetails()">
+        <span>Confidence Details</span>
+        <span class="chevron">{{ showConfidenceDetails ? "▲" : "▼" }}</span>
+      </button>
+
+      <div *ngIf="showConfidenceDetails" class="confidence-details">
+        <p class="confidence-explanation">
+          Confidence scores indicate how certain the AI is about each
+          recognition. Higher scores mean more accurate identification.
+        </p>
+        <div class="confidence-legend">
+          <div class="legend-item">
+            <div class="legend-color success"></div>
+            <span>80%+ - Very confident</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color warning"></div>
+            <span>60-79% - Moderately confident</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color danger"></div>
+            <span>Below 60% - Low confidence</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <button class="edit-button secondary" (click)="editMeal()">
+        <span class="icon">✏️</span>
+        Edit Items
+      </button>
+      <button class="accept-button primary" (click)="acceptAndFinish()">
+        <span class="icon">✅</span>
+        Accept & Finish
+      </button>
+    </div>
+  </div>
+</div>
