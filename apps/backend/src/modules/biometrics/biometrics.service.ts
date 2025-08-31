@@ -8,6 +8,8 @@ import {
   BPEntry,
   CreateHRRequest,
   HREntry,
+  CreatePainRequest,
+  PainEntry,
 } from './biometrics.dto';
 
 export class BiometricsService {
@@ -262,6 +264,91 @@ export class BiometricsService {
     return results.map((result) => ({
       id: result.id,
       bpm: result.bpm,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    }));
+  }
+
+  async logPain(
+    data: CreatePainRequest & { userId: string }
+  ): Promise<PainEntry> {
+    // Validate score range
+    if (data.score < 1 || data.score > 10) {
+      throw new Error('Pain score must be between 1 and 10');
+    }
+
+    // Validate location enum
+    const validLocations = [
+      'lower_back',
+      'between_shoulders',
+      'elbows',
+      'coccyx',
+      'other',
+    ];
+    if (!validLocations.includes(data.location)) {
+      throw new Error(
+        `Invalid location. Must be one of: ${validLocations.join(', ')}`
+      );
+    }
+
+    const result = await this.prisma.biometricsPain.create({
+      data: {
+        userId: data.userId,
+        location: data.location,
+        score: data.score,
+        note: data.note,
+        takenAt: data.takenAt ? new Date(data.takenAt) : new Date(),
+      },
+    });
+
+    // Log telemetry
+    console.log(`pain_logged ${data.score} ${data.location} ${data.userId}`);
+
+    return {
+      id: result.id,
+      location: result.location,
+      score: result.score,
+      note: result.note,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getLatestPain(userId: string): Promise<PainEntry | null> {
+    const result = await this.prisma.biometricsPain.findFirst({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      id: result.id,
+      location: result.location,
+      score: result.score,
+      note: result.note,
+      takenAt: result.takenAt.toISOString(),
+      createdAt: result.createdAt.toISOString(),
+    };
+  }
+
+  async getRecentPain(
+    userId: string,
+    limit: number = 10
+  ): Promise<PainEntry[]> {
+    const results = await this.prisma.biometricsPain.findMany({
+      where: { userId },
+      orderBy: { takenAt: 'desc' },
+      take: limit,
+    });
+
+    return results.map((result) => ({
+      id: result.id,
+      location: result.location,
+      score: result.score,
+      note: result.note,
       takenAt: result.takenAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
     }));

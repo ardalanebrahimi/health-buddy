@@ -11,6 +11,9 @@ import {
   getRecentBP,
   logHR,
   getRecentHR,
+  logPain,
+  getLatestPain,
+  getRecentPain,
 } from './biometrics.controller';
 
 const router: ExpressRouter = Router();
@@ -44,5 +47,14 @@ router.get('/hr/recent', getRecentHR);
 
 // POST /biometrics/hr - Log heart rate
 router.post('/hr', logHR);
+
+// GET /biometrics/pain/recent - Get recent pain entries
+router.get('/pain/recent', getRecentPain);
+
+// POST /biometrics/pain - Log pain
+router.post('/pain', logPain);
+
+// GET /biometrics/pain/latest - Get latest pain entry
+router.get('/pain/latest', getLatestPain);
 
 export default router;

@@ -54,6 +54,11 @@
         <span>BP & Heart Rate</span>
         <small>Blood pressure & HR</small>
       </button>
+      <button class="module-btn biometrics" routerLink="/biometrics/pain">
+        <div class="icon">🩹</div>
+        <span>Pain Log</span>
+        <small>Track pain levels</small>
+      </button>
       <button class="module-btn dashboard" disabled>
         <div class="icon">📈</div>
         <span>Dashboard</span>
@@ -77,6 +82,9 @@
         </button>
         <button class="quick-action-btn" routerLink="/biometrics/bp-hr">
           + BP/HR
+        </button>
+        <button class="quick-action-btn" routerLink="/biometrics/pain">
+          + Pain
         </button>
       </div>
     </div>
@@ -141,6 +149,14 @@
         <div class="stat" *ngIf="latestHR && isTodayData(latestHR.takenAt)">
           <label>Resting HR:</label>
           <span>{{ latestHR.bpm }} bpm</span>
+        </div>
+        <div class="stat" *ngIf="latestPain && isTodayData(latestPain.takenAt)">
+          <label>Pain:</label>
+          <span
+            >{{ latestPain.score }}/10 ({{
+              latestPain.location.replace("_", " ") | titlecase
+            }})</span
+          >
         </div>
       </div>
     </div>

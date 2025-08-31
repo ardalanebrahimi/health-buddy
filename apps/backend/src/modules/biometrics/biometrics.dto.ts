@@ -49,3 +49,19 @@ export interface HREntry {
   takenAt: string;
   createdAt: string;
 }
+
+export interface CreatePainRequest {
+  location: string;
+  score: number;
+  note?: string;
+  takenAt?: string;
+}
+
+export interface PainEntry {
+  id: string;
+  location: string;
+  score: number;
+  note?: string;
+  takenAt: string;
+  createdAt: string;
+}

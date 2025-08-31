@@ -155,6 +155,19 @@ model BiometricsHR {
   @@map("biometrics_hr")
 }
 
+model BiometricsPain {
+  id        String   @id @default(uuid())
+  userId    String
+  location  String   // enum: lower_back, between_shoulders, elbows, coccyx, other
+  score     Int      // 1-10 scale
+  note      String?
+  takenAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+  @@map("biometrics_pain")
+}
+
 model CompanionMessage {
   id        String   @id @default(uuid())
   userId    String

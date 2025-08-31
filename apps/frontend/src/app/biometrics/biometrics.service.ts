@@ -54,6 +54,22 @@ export interface LogHRRequest {
   takenAt?: string;
 }
 
+export interface PainEntry {
+  id: string;
+  location: string;
+  score: number;
+  note?: string;
+  takenAt: string;
+  createdAt: string;
+}
+
+export interface LogPainRequest {
+  location: string;
+  score: number;
+  note?: string;
+  takenAt?: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -76,6 +92,10 @@ export class BiometricsService {
   private latestHRSubject = new BehaviorSubject<HREntry | null>(null);
   public latestHR$ = this.latestHRSubject.asObservable();
 
+  // Local cache for latest pain
+  private latestPainSubject = new BehaviorSubject<PainEntry | null>(null);
+  public latestPain$ = this.latestPainSubject.asObservable();
+
   constructor() {
     this.client = new HealthCompanionClient("http://localhost:3000/api/v1");
     // Load latest values on service initialization
@@ -83,6 +103,7 @@ export class BiometricsService {
     this.loadLatestWaist();
     this.loadLatestBP();
     this.loadLatestHR();
+    this.loadLatestPain();
   }
 
   async logWeight(valueKg: number, takenAt?: string): Promise<WeightEntry> {
@@ -321,5 +342,43 @@ export class BiometricsService {
 
   private async loadLatestHR(): Promise<void> {
     await this.getLatestHR();
+  }
+
+  // Pain methods
+  async logPain(data: LogPainRequest): Promise<PainEntry> {
+    try {
+      const result = await this.client.createPainEntry(data);
+      // Update latest pain cache if this entry is more recent
+      await this.loadLatestPain();
+      return result;
+    } catch (error) {
+      console.error("Error logging pain:", error);
+      throw error;
+    }
+  }
+
+  async getRecentPain(limit: number = 10): Promise<PainEntry[]> {
+    try {
+      const result = await this.client.getRecentPain({ limit });
+      return result;
+    } catch (error) {
+      console.error("Error getting recent pain:", error);
+      return [];
+    }
+  }
+
+  async getLatestPain(): Promise<PainEntry | null> {
+    try {
+      const result = await this.client.getLatestPain();
+      this.latestPainSubject.next(result);
+      return result;
+    } catch (error) {
+      console.error("Error getting latest pain:", error);
+      return null;
+    }
+  }
+
+  private async loadLatestPain(): Promise<void> {
+    await this.getLatestPain();
   }
 }

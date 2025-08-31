@@ -874,6 +874,77 @@ paths:
                 items:
                   $ref: '#/components/schemas/HREntry'
 
+  /biometrics/pain:
+    post:
+      tags:
+        - biometrics
+      summary: Log pain entry
+      description: Record a pain measurement with location, score, and optional note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePainRequest'
+      responses:
+        '201':
+          description: Pain entry logged successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PainEntry'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/pain/latest:
+    get:
+      tags:
+        - biometrics
+      summary: Get latest pain entry
+      description: Retrieve the most recent pain measurement
+      responses:
+        '200':
+          description: Latest pain entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PainEntry'
+        '404':
+          description: No pain entries found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /biometrics/pain/recent:
+    get:
+      tags:
+        - biometrics
+      summary: Get recent pain entries
+      description: Retrieve the most recent pain measurements
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: Recent pain entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PainEntry'
+
   /daily-summary:
     get:
       tags:
@@ -1960,6 +2031,65 @@ components:
       required:
         - entries
         - total
+
+    PainEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '123e4567-e89b-12d3-a456-426614174000'
+        location:
+          type: string
+          enum: ['lower_back', 'between_shoulders', 'elbows', 'coccyx', 'other']
+          example: 'lower_back'
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 7
+        note:
+          type: string
+          maxLength: 250
+          example: 'worse after sitting'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - id
+        - location
+        - score
+        - takenAt
+        - createdAt
+
+    CreatePainRequest:
+      type: object
+      properties:
+        location:
+          type: string
+          enum: ['lower_back', 'between_shoulders', 'elbows', 'coccyx', 'other']
+          example: 'lower_back'
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 7
+        note:
+          type: string
+          maxLength: 250
+          example: 'worse after sitting'
+        takenAt:
+          type: string
+          format: date-time
+          example: '2025-08-30T21:00:00Z'
+      required:
+        - location
+        - score
 
     DailySummary:
       type: object

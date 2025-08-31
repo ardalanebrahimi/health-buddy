@@ -6,6 +6,7 @@ import {
   CreateWaistRequest,
   CreateBPRequest,
   CreateHRRequest,
+  CreatePainRequest,
 } from './biometrics.dto';
 
 const prisma = new PrismaClient();
@@ -396,6 +397,149 @@ export const getRecentHR = async (
       error: {
         code: 'INTERNAL_ERROR',
         message: 'Failed to get recent heart rate entries',
+      },
+    });
+  }
+};
+
+export const logPain = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const data: CreatePainRequest = req.body;
+
+    // Validate required fields
+    if (!data.location) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_LOCATION',
+          message: 'location is required',
+        },
+      });
+    }
+
+    if (data.score === undefined || data.score === null) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_SCORE',
+          message: 'score is required',
+        },
+      });
+    }
+
+    // Validate score range
+    if (data.score < 1 || data.score > 10) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_SCORE',
+          message: 'Score must be between 1 and 10',
+        },
+      });
+    }
+
+    // Validate location enum
+    const validLocations = [
+      'lower_back',
+      'between_shoulders',
+      'elbows',
+      'coccyx',
+      'other',
+    ];
+    if (!validLocations.includes(data.location)) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_LOCATION',
+          message: `Location must be one of: ${validLocations.join(', ')}`,
+        },
+      });
+    }
+
+    // Validate note length if provided
+    if (data.note && data.note.length > 250) {
+      return res.status(400).json({
+        error: {
+          code: 'NOTE_TOO_LONG',
+          message: 'Note must be 250 characters or less',
+        },
+      });
+    }
+
+    const result = await biometricsService.logPain({
+      ...data,
+      userId,
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error logging pain:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to log pain entry',
+      },
+    });
+  }
+};
+
+export const getLatestPain = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const result = await biometricsService.getLatestPain(userId);
+
+    if (!result) {
+      return res.status(404).json({
+        error: {
+          code: 'NO_PAIN_ENTRIES',
+          message: 'No pain entries found',
+        },
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting latest pain:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to get latest pain entry',
+      },
+    });
+  }
+};
+
+export const getRecentPain = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = 'default-user';
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_LIMIT',
+          message: 'Limit must be between 1 and 100',
+        },
+      });
+    }
+
+    const result = await biometricsService.getRecentPain(userId, limit);
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting recent pain:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to get recent pain entries',
       },
     });
   }

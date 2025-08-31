@@ -7,6 +7,7 @@ import {
   WeightEntry,
   BPEntry,
   HREntry,
+  PainEntry,
 } from "../biometrics/biometrics.service";
 
 @Component({
@@ -26,6 +27,7 @@ export class HomeComponent implements OnInit {
   latestWeight: WeightEntry | null = null;
   latestBP: BPEntry | null = null;
   latestHR: HREntry | null = null;
+  latestPain: PainEntry | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -36,6 +38,7 @@ export class HomeComponent implements OnInit {
     this.loadLatestWeight();
     this.loadLatestBP();
     this.loadLatestHR();
+    this.loadLatestPain();
   }
 
   async checkApiHealth() {
@@ -95,6 +98,14 @@ export class HomeComponent implements OnInit {
       this.latestHR = await this.biometricsService.getLatestHR();
     } catch (error) {
       console.error("Failed to load latest heart rate:", error);
+    }
+  }
+
+  async loadLatestPain() {
+    try {
+      this.latestPain = await this.biometricsService.getLatestPain();
+    } catch (error) {
+      console.error("Failed to load latest pain:", error);
     }
   }
 

@@ -1,0 +1,141 @@
+<div class="pain-log-container">
+  <div class="header">
+    <h1>Log Pain</h1>
+    <button
+      type="button"
+      class="close-btn"
+      (click)="cancel()"
+      aria-label="Close"
+    >
+      ×
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="pain-form">
+    <div class="form-group">
+      <label for="location">Location *</label>
+      <select
+        id="location"
+        formControlName="location"
+        [class.error]="
+          form.get('location')?.invalid && form.get('location')?.touched
+        "
+      >
+        <option value="">Select pain location</option>
+        @for (option of locationOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+
+      @if (form.get('location')?.invalid && form.get('location')?.touched) {
+      <div class="error-messages">
+        @if (form.get('location')?.errors?.['required']) {
+        <span>Pain location is required</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="score">Pain Level (1-10) *</label>
+      <div class="score-container">
+        <input
+          id="score"
+          type="range"
+          min="1"
+          max="10"
+          step="1"
+          formControlName="score"
+          class="score-slider"
+          [attr.data-color]="getScoreColor(scoreValue)"
+        />
+        <div class="score-display">
+          <span
+            class="score-value"
+            [attr.data-color]="getScoreColor(scoreValue)"
+          >
+            {{ scoreValue }}
+          </span>
+          <span class="score-description">
+            {{ getScoreDescription(scoreValue) }}
+          </span>
+        </div>
+      </div>
+
+      @if (form.get('score')?.invalid && form.get('score')?.touched) {
+      <div class="error-messages">
+        @if (form.get('score')?.errors?.['required']) {
+        <span>Pain score is required</span>
+        } @if (form.get('score')?.errors?.['min'] ||
+        form.get('score')?.errors?.['max']) {
+        <span>Pain score must be between 1 and 10</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="note">Notes (optional)</label>
+      <textarea
+        id="note"
+        formControlName="note"
+        placeholder="Additional notes about your pain (max 250 characters)"
+        maxlength="250"
+        rows="3"
+        [class.error]="form.get('note')?.invalid && form.get('note')?.touched"
+      ></textarea>
+
+      @if (form.get('note')?.invalid && form.get('note')?.touched) {
+      <div class="error-messages">
+        @if (form.get('note')?.errors?.['maxlength']) {
+        <span>Note must be 250 characters or less</span>
+        }
+      </div>
+      }
+
+      <div class="character-count">
+        {{ form.get("note")?.value?.length || 0 }}/250
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="takenAt">Date & Time</label>
+      <input
+        id="takenAt"
+        type="datetime-local"
+        formControlName="takenAt"
+        [class.error]="
+          form.get('takenAt')?.invalid && form.get('takenAt')?.touched
+        "
+      />
+    </div>
+
+    @if (error) {
+    <div class="error-banner">
+      {{ error }}
+    </div>
+    }
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="loading"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!isFormValid || loading"
+      >
+        @if (loading) {
+        <span>Saving...</span>
+        } @else {
+        <span>Save Pain Entry</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

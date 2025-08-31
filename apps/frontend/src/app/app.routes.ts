@@ -119,6 +119,14 @@ export const routes: Routes = [
       ),
     canMatch: [lockGuard, profileCompleteGuard],
   },
+  {
+    path: "biometrics/pain",
+    loadComponent: () =>
+      import("./biometrics/pain/pain-log.component").then(
+        (m) => m.PainLogComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
 
   // Redirect unknown routes to home
   {
