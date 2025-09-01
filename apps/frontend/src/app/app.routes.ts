@@ -72,6 +72,14 @@ export const routes: Routes = [
     canMatch: [lockGuard, profileCompleteGuard],
   },
   {
+    path: "nutrition/summary",
+    loadComponent: () =>
+      import("./nutrition/summary/nutrition-summary.component").then(
+        (m) => m.NutritionSummaryComponent
+      ),
+    canMatch: [lockGuard, profileCompleteGuard],
+  },
+  {
     path: "nutrition/add-meal",
     loadComponent: () =>
       import("./nutrition/add-meal/meal-photo.component").then(

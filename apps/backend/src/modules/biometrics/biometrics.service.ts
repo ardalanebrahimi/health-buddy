@@ -312,7 +312,7 @@ export class BiometricsService {
       id: result.id,
       location: result.location,
       score: result.score,
-      note: result.note,
+      note: result.note || undefined,
       takenAt: result.takenAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
     };
@@ -332,7 +332,7 @@ export class BiometricsService {
       id: result.id,
       location: result.location,
       score: result.score,
-      note: result.note,
+      note: result.note || undefined,
       takenAt: result.takenAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
     };
@@ -352,7 +352,7 @@ export class BiometricsService {
       id: result.id,
       location: result.location,
       score: result.score,
-      note: result.note,
+      note: result.note || undefined,
       takenAt: result.takenAt.toISOString(),
       createdAt: result.createdAt.toISOString(),
     }));

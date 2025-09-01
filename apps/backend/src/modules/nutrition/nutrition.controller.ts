@@ -376,3 +376,59 @@ export const createMeal = async (
     });
   }
 };
+
+// NU-006: Get daily nutrition summary
+export const getSummary: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { date } = req.query;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'User not authenticated',
+        },
+      });
+    }
+
+    if (!date || typeof date !== 'string') {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_DATE',
+          message:
+            'Date parameter is required and must be in YYYY-MM-DD format',
+        },
+      });
+    }
+
+    // Validate date format (basic check)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({
+        error: {
+          code: 'INVALID_DATE_FORMAT',
+          message: 'Date must be in YYYY-MM-DD format',
+        },
+      });
+    }
+
+    const summary = await nutritionService.getSummary(date, userId);
+
+    // Log telemetry event
+    console.log('Telemetry: nutrition_summary_viewed', { date, userId });
+
+    res.json(summary);
+  } catch (error) {
+    console.error('Error getting nutrition summary:', error);
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
+    });
+  }
+};

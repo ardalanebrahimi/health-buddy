@@ -560,9 +560,7 @@ export class NutritionService {
   }
 
   // Helper method to look up food nutrition data
-  private async lookupFoodNutrition(
-    foodName: string
-  ): Promise<{
+  private async lookupFoodNutrition(foodName: string): Promise<{
     calories: number;
     protein: number;
     carbs: number;
@@ -629,6 +627,105 @@ export class NutritionService {
       protein: bestMatch.protein,
       carbs: bestMatch.carbs,
       fat: bestMatch.fat,
+    };
+  }
+
+  // NU-006: Get daily nutrition summary
+  async getSummary(
+    date: string,
+    userId: string
+  ): Promise<{
+    date: string;
+    totals: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      waterLiters: number;
+    };
+    meals: Array<{
+      mealId: string;
+      takenAt: string;
+      calories: number;
+      status: MealStatus;
+      thumbnailUrl?: string;
+    }>;
+  }> {
+    const start = new Date(date + 'T00:00:00.000Z');
+    const end = new Date(date + 'T23:59:59.999Z');
+
+    // Get all meals for the date with draft, recognized, or final status
+    const meals = await this.prisma.meal.findMany({
+      where: {
+        userId,
+        takenAt: { gte: start, lte: end },
+        status: { in: ['draft', 'recognized', 'final'] },
+      },
+      include: {
+        items: true,
+        photo: true,
+      },
+      orderBy: { takenAt: 'asc' },
+    });
+
+    // Calculate totals from meals
+    const totals = meals.reduce(
+      (acc, meal) => {
+        const mealTotals = meal.items.reduce(
+          (mealSum, item) => ({
+            calories: mealSum.calories + (item.calories ?? 0),
+            protein: mealSum.protein + (item.protein ?? 0),
+            carbs: mealSum.carbs + (item.carbs ?? 0),
+            fat: mealSum.fat + (item.fat ?? 0),
+          }),
+          { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
+
+        acc.calories += mealTotals.calories;
+        acc.protein += mealTotals.protein;
+        acc.carbs += mealTotals.carbs;
+        acc.fat += mealTotals.fat;
+
+        return acc;
+      },
+      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    );
+
+    // Get hydration for the day
+    const hydrationResult = await this.prisma.hydration.aggregate({
+      _sum: { amountMl: true },
+      where: {
+        userId,
+        takenAt: { gte: start, lte: end },
+      },
+    });
+
+    const waterLiters = (hydrationResult._sum.amountMl ?? 0) / 1000;
+
+    // Format meals response
+    const mealsData = meals.map((meal) => {
+      // Calculate meal calories from items
+      const mealCalories = meal.items.reduce(
+        (sum, item) => sum + (item.calories ?? 0),
+        0
+      );
+
+      return {
+        mealId: meal.id,
+        takenAt: meal.takenAt?.toISOString() ?? new Date().toISOString(),
+        calories: mealCalories,
+        status: meal.status,
+        thumbnailUrl: meal.photo?.photoUrl,
+      };
+    });
+
+    return {
+      date,
+      totals: {
+        ...totals,
+        waterLiters,
+      },
+      meals: mealsData,
     };
   }
 }

@@ -6,9 +6,13 @@ import {
   updateMealItems,
   searchFoods,
   createMeal,
+  getSummary,
 } from './nutrition.controller';
 
 const router: Router = Router();
+
+// GET /summary - Get daily nutrition summary (NU-006)
+router.get('/summary', getSummary);
 
 // GET /foods/search - Search for foods (NU-004)
 router.get('/foods/search', searchFoods);

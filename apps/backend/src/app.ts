@@ -73,7 +73,7 @@ export function createApp() {
   // Mount module routers
   v1Router.use('/auth', authRouter);
   v1Router.use('/', usersRouter); // Profile and goals endpoints
-  v1Router.use('/', nutritionRouter); // Nutrition endpoints
+  v1Router.use('/nutrition', nutritionRouter); // Nutrition endpoints
   v1Router.use('/biometrics', biometricsRouter); // Biometrics endpoints
   v1Router.use('/companion', companionRouter); // Companion endpoints
   v1Router.use('/', dashboardRouter); // Dashboard endpoints

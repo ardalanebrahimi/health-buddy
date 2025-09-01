@@ -39,6 +39,27 @@ export interface FoodItem {
   editedByUser?: boolean;
 }
 
+// NU-006: Daily nutrition summary interfaces
+export interface NutritionSummary {
+  date: string;
+  totals: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    waterLiters: number;
+  };
+  meals: NutritionSummaryMeal[];
+}
+
+export interface NutritionSummaryMeal {
+  mealId: string;
+  takenAt: string;
+  calories: number;
+  status: "draft" | "recognized" | "final";
+  thumbnailUrl?: string;
+}
+
 export interface MealRecognitionResponse {
   mealId: string;
   status: "completed" | "failed" | "processing";
@@ -139,20 +160,23 @@ export class MealApiService {
     }
 
     return this.http
-      .post<MealPhotoResponse>(`${this.baseUrl}/meals/photo`, formData)
+      .post<MealPhotoResponse>(
+        `${this.baseUrl}/nutrition/meals/photo`,
+        formData
+      )
       .pipe(catchError(this.handleError));
   }
 
   getMealById(mealId: string): Observable<Meal> {
     return this.http
-      .get<Meal>(`${this.baseUrl}/meals/${mealId}`)
+      .get<Meal>(`${this.baseUrl}/nutrition/meals/${mealId}`)
       .pipe(catchError(this.handleError));
   }
 
   recognizeMeal(mealId: string): Observable<MealRecognitionResponse> {
     return this.http
       .post<MealRecognitionResponse>(
-        `${this.baseUrl}/meals/${mealId}/recognize`,
+        `${this.baseUrl}/nutrition/meals/${mealId}/recognize`,
         {}
       )
       .pipe(catchError(this.handleError));
@@ -164,7 +188,7 @@ export class MealApiService {
   ): Observable<UpdateMealItemsResponse> {
     return this.http
       .patch<UpdateMealItemsResponse>(
-        `${this.baseUrl}/meals/${mealId}/items`,
+        `${this.baseUrl}/nutrition/meals/${mealId}/items`,
         request
       )
       .pipe(catchError(this.handleError));
@@ -185,7 +209,7 @@ export class MealApiService {
     query: string,
     limit: number = 10
   ): Promise<FoodSearchResponse> {
-    const url = `${environment.apiBaseUrl}/foods/search`;
+    const url = `${environment.apiBaseUrl}/nutrition/foods/search`;
     const params = new URLSearchParams({ q: query, limit: limit.toString() });
 
     return this.http
@@ -198,12 +222,22 @@ export class MealApiService {
   async createManualMeal(
     mealData: CreateMealRequest
   ): Promise<CreateMealResponse> {
-    const url = `${environment.apiBaseUrl}/meals`;
+    const url = `${environment.apiBaseUrl}/nutrition/meals`;
 
     return this.http
       .post<CreateMealResponse>(url, mealData)
       .pipe(catchError(this.handleError))
       .toPromise() as Promise<CreateMealResponse>;
+  }
+
+  // NU-006: Get daily nutrition summary
+  async getSummary(date: string): Promise<NutritionSummary> {
+    const url = `${environment.apiBaseUrl}/nutrition/summary`;
+
+    return this.http
+      .get<NutritionSummary>(url, { params: { date } })
+      .pipe(catchError(this.handleError))
+      .toPromise() as Promise<NutritionSummary>;
   }
 
   private handleError = (error: HttpErrorResponse): Observable<never> => {

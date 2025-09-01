@@ -1,0 +1,116 @@
+<div class="nutrition-summary">
+  <header class="page-header">
+    <h1>Today's Nutrition</h1>
+    <button class="refresh-btn" (click)="onRefresh()" [disabled]="loading()">
+      <span class="refresh-icon">🔄</span>
+    </button>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading nutrition summary...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-container">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error() }}</p>
+    <button class="retry-btn" (click)="loadSummary()">
+      <span>🔄</span> Try Again
+    </button>
+  </div>
+
+  <!-- Summary Content -->
+  <div *ngIf="summary() as s" class="summary-content">
+    <!-- Daily Totals Header -->
+    <div class="totals-card">
+      <div class="card-header">
+        <h2>Daily Totals</h2>
+        <p class="date">{{ s.date | date }}</p>
+      </div>
+
+      <div class="totals-grid">
+        <div class="total-item">
+          <div class="total-value">
+            {{ s.totals.calories | number : "1.0-0" }}
+          </div>
+          <div class="total-label">kcal</div>
+        </div>
+        <div class="total-item">
+          <div class="total-value">
+            {{ s.totals.protein | number : "1.0-0" }}g
+          </div>
+          <div class="total-label">Protein</div>
+        </div>
+        <div class="total-item">
+          <div class="total-value">
+            {{ s.totals.carbs | number : "1.0-0" }}g
+          </div>
+          <div class="total-label">Carbs</div>
+        </div>
+        <div class="total-item">
+          <div class="total-value">{{ s.totals.fat | number : "1.0-0" }}g</div>
+          <div class="total-label">Fat</div>
+        </div>
+        <div class="total-item">
+          <div class="total-value">
+            {{ s.totals.waterLiters | number : "1.1-1" }}L
+          </div>
+          <div class="total-label">Water</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meals List -->
+    <div class="meals-section">
+      <h3>Today's Meals</h3>
+
+      <div *ngIf="s.meals.length === 0" class="no-meals">
+        <span class="no-meals-icon">🍽️</span>
+        <p>No meals logged today</p>
+      </div>
+
+      <div *ngFor="let meal of s.meals" class="meal-item">
+        <div class="meal-content">
+          <div class="meal-image">
+            <img
+              *ngIf="meal.thumbnailUrl; else noImage"
+              [src]="meal.thumbnailUrl"
+              [alt]="'Meal at ' + formatTime(meal.takenAt)"
+              loading="lazy"
+            />
+            <ng-template #noImage>
+              <div class="placeholder-image">
+                <span>🍽️</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="meal-details">
+            <div class="meal-time">{{ formatTime(meal.takenAt) }}</div>
+            <div class="meal-calories">
+              {{ meal.calories | number : "1.0-0" }} kcal
+            </div>
+          </div>
+
+          <div class="meal-status">
+            <span
+              class="status-pill"
+              [ngClass]="getStatusPillClass(meal.status)"
+            >
+              {{ getStatusText(meal.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && !error() && !summary()" class="empty-state">
+    <span class="empty-icon">📅</span>
+    <h3>No data available</h3>
+    <p>Start logging your meals to see your nutrition summary</p>
+  </div>
+</div>

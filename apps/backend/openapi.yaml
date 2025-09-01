@@ -177,7 +177,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /foods/search:
+  /nutrition/foods/search:
     get:
       tags:
         - nutrition
@@ -215,7 +215,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /meals:
+  /nutrition/meals:
     get:
       tags:
         - nutrition
@@ -269,7 +269,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /meals/photo:
+  /nutrition/meals/photo:
     post:
       tags:
         - nutrition
@@ -331,7 +331,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /meals/{mealId}:
+  /nutrition/meals/{mealId}:
     get:
       tags:
         - nutrition
@@ -367,7 +367,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /meals/{mealId}/recognize:
+  /nutrition/meals/{mealId}/recognize:
     post:
       tags:
         - nutrition
@@ -402,7 +402,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /meals/{mealId}/items:
+  /nutrition/meals/{mealId}/items:
     patch:
       tags:
         - nutrition
@@ -454,30 +454,30 @@ paths:
     get:
       tags:
         - nutrition
-      summary: Get nutrition summary
-      description: Get daily or weekly nutrition summary
+      summary: Get daily nutrition summary
+      description: Get daily nutrition summary with totals and meal list including hydration
       parameters:
         - name: date
           in: query
           description: Date for the summary (YYYY-MM-DD format)
+          required: true
           schema:
             type: string
             format: date
-            example: '2025-08-30'
-        - name: period
-          in: query
-          description: Summary period
-          schema:
-            type: string
-            enum: [daily, weekly]
-            default: daily
+            example: '2025-08-29'
       responses:
         '200':
-          description: Nutrition summary retrieved successfully
+          description: Daily nutrition summary retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NutritionSummary'
+        '400':
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /hydration:
     get:
@@ -1706,52 +1706,71 @@ components:
         date:
           type: string
           format: date
-          example: '2025-08-30'
-        period:
-          type: string
-          enum: [daily, weekly]
-          example: daily
-        totalCalories:
-          type: number
-          minimum: 0
-          example: 1850
-        totalProteinGrams:
-          type: number
-          minimum: 0
-          example: 120
-        totalCarbsGrams:
-          type: number
-          minimum: 0
-          example: 180
-        totalFatGrams:
-          type: number
-          minimum: 0
-          example: 65
-        goalCalories:
-          type: number
-          minimum: 0
-          example: 2000
-        goalProteinGrams:
-          type: number
-          minimum: 0
-          example: 150
-        goalCarbsGrams:
-          type: number
-          minimum: 0
-          example: 200
-        goalFatGrams:
-          type: number
-          minimum: 0
-          example: 65
-        mealBreakdown:
+          example: '2025-08-29'
+        totals:
+          type: object
+          properties:
+            calories:
+              type: number
+              minimum: 0
+              example: 2120
+            protein:
+              type: number
+              minimum: 0
+              example: 120
+            carbs:
+              type: number
+              minimum: 0
+              example: 210
+            fat:
+              type: number
+              minimum: 0
+              example: 70
+            waterLiters:
+              type: number
+              minimum: 0
+              example: 1.6
+          required:
+            - calories
+            - protein
+            - carbs
+            - fat
+            - waterLiters
+        meals:
           type: array
           items:
-            $ref: '#/components/schemas/MealSummary'
+            type: object
+            properties:
+              mealId:
+                type: string
+                format: uuid
+                example: '550e8400-e29b-41d4-a716-446655440000'
+              takenAt:
+                type: string
+                format: date-time
+                example: '2025-08-29T12:05:00Z'
+              calories:
+                type: number
+                minimum: 0
+                example: 740
+              status:
+                type: string
+                enum: [draft, recognized, final]
+                example: 'final'
+              thumbnailUrl:
+                type: string
+                format: uri
+                example: 'https://api.example.com/photos/thumb_123.jpg'
+                nullable: true
+            required:
+              - mealId
+              - takenAt
+              - calories
+              - status
       required:
         - date
-        - period
-        - totalCalories
-        - goalCalories
+        - totals
+        - meals
 
     MealSummary:
       type: object
